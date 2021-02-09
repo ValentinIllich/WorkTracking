@@ -1,0 +1,3 @@
+Command: %{Qt:QT_INSTALL_BINS}\windeployqt.exe
+Arguments: --qmldir %{CurrentProject:Path} %{CurrentRun:Executable:FilePath}
+Working dir: %{buildDir}

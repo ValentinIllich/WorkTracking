@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>TumblerDelegate.qml</file>
+        <file>WorkDelegate.qml</file>
+        <file>WorkDialog.qml</file>
+        <file>translations/workTracking_de.qm</file>
+        <file>translations/workTracking_fr.qm</file>
+    </qresource>
+</RCC>
