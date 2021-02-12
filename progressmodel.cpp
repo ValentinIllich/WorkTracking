@@ -17,24 +17,45 @@ ProgressEntry::ProgressEntry(int id, QDateTime timestamp, QString name, QString 
 ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
 {
   QStringList properties = fromString.split(";");
-  QDateTime time = QDateTime::fromSecsSinceEpoch(properties[3].toLongLong());
-  m_id = (itemId==-1 ? properties[0].toInt() : itemId),
-      m_timeStamp = time;
-  m_name = properties[1];
-  m_description = properties[2];
-  m_active = false;
-  m_doneHome = properties.count()==6 ? (properties[5]=="h") : true;
-  m_workInSeconds = properties[4].toULongLong();
+  if( properties[0].contains("=") )
+  {
+    for( const auto &item : qAsConst(properties) )
+    {
+      if( item.contains("itmid=") )
+        m_id = (itemId==-1 ? item.midRef(6).toInt() : itemId);
+      if( item.contains("title=") )
+        m_name = item.mid(6);
+      if( item.contains("descr=") )
+        m_description = item.mid(6);
+      if( item.contains("creat=") )
+        m_timeStamp = QDateTime::fromSecsSinceEpoch(item.mid(6).toLongLong());;
+      if( item.contains("spent=") )
+        m_workInSeconds = item.midRef(6).toULongLong();
+    }
+    m_active = false;
+    m_doneHome = false;
+  }
+  else
+  {
+    QDateTime time = QDateTime::fromSecsSinceEpoch(properties[3].toLongLong());
+    m_id = (itemId==-1 ? properties[0].toInt() : itemId),
+        m_timeStamp = time;
+    m_name = properties[1];
+    m_description = properties[2];
+    m_active = false;
+    m_doneHome = properties.count()==6 ? (properties[5]=="h") : true;
+    m_workInSeconds = properties[4].toULongLong();
+  }
 }
 
 QString ProgressEntry::toString() const
 {
-  return   QString::number(m_id) + ";"
-                         + m_name + ";"
-                         + m_description + ";"
-         + QString::number(m_timeStamp.toSecsSinceEpoch()) + ";"
-         + QString::number(m_workInSeconds) + ";"
-         +                (m_doneHome ? "h" : "o");
+  return    "itmid=" +    QString::number(m_id) + ";"
+          + "title=" +                    m_name + ";"
+          + "descr=" +                    m_description + ";"
+          + "creat=" +    QString::number(m_timeStamp.toSecsSinceEpoch()) + ";"
+          + "spent=" +    QString::number(m_workInSeconds);// + ";"
+           //"" +                   (m_doneHome ? "h" : "o");
 }
 
 int ProgressEntry::getId() const
