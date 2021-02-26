@@ -53,6 +53,7 @@ import QtQuick.Controls 2.4
 import QtQuick.Controls.Material 2.4
 import QtQuick.Layouts 1.11
 import QtQuick.Window 2.11
+import QtQuick.Dialogs 1.0
 import Qt.labs.calendar 1.0
 
 import ProjectsData 1.0
@@ -81,7 +82,7 @@ ApplicationWindow {
     }
 
     ListView {
-        id: alarmListView
+        id: workListView
         anchors.topMargin: currentDate.height + 2*8
         anchors.bottomMargin: addAlarmButton.height
         anchors.fill: parent
@@ -97,6 +98,10 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.topMargin: 8
         onClicked: projectData.previous()
+        ToolTip.delay: 2000
+        ToolTip.timeout: 10000
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("select previous time period")
     }
 
     RoundButton {
@@ -107,6 +112,10 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.topMargin: 8
         onClicked: projectData.next()
+        ToolTip.delay: 2000
+        ToolTip.timeout: 10000
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("select next time period")
     }
 
     RoundButton {
@@ -118,6 +127,10 @@ ApplicationWindow {
         anchors.leftMargin: 8
         onClicked: displaymenu.open()
         onPressAndHold: configmenu.open()
+        ToolTip.delay: 2000
+        ToolTip.timeout: 10000
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("short press: display menu\nlong presas: config menu")
     }
 
     RoundButton {
@@ -128,6 +141,10 @@ ApplicationWindow {
         anchors.bottomMargin: 8
         anchors.horizontalCenter: parent.horizontalCenter
         onClicked: workDialog.open()
+        ToolTip.delay: 2000
+        ToolTip.timeout: 10000
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("add a new work item")
     }
 
     RoundButton {
@@ -138,6 +155,10 @@ ApplicationWindow {
         anchors.right: parent.right
         anchors.rightMargin: 8
         onClicked: projectData.changeSummary()
+        ToolTip.delay: 2000
+        ToolTip.timeout: 10000
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("switch between hours and percent\n(but not in day view)")
     }
 
     Menu {
@@ -238,12 +259,11 @@ ApplicationWindow {
         y: sumButton.y-implicitHeight
         width: parent.width
 
-
         ColumnLayout {
             anchors.fill: parent
                 Label {
                     text: qsTr("copy to clipboard...")
-                    visible: projectData.showSumInPercent
+                    visible: !projectData.showSumInPercent
                 }
                 Label {
                     text: qsTr("including recreation time of")
