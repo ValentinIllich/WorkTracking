@@ -141,7 +141,8 @@ private:
   QString humanReadableMonth(int month);
   QString humanReadableWeekDay(int weekday);
 
-  QString getSummary(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;
+  quint64 getSummaryWorkInSeconds(ProgressEntry const &entry) const;
+  QString getSummaryText(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;
 
   void saveData(QString const &filename, bool createBackup = false);
 

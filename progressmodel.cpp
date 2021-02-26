@@ -249,7 +249,7 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
     {
       ProgressEntry summary;
       summary.addWorkInSeconds(0,item->workInSeconds());
-      data += item->projectName() + "\t" + getSummary(summary,m_totalWorkSeconds,true) + "\n";
+      data += item->projectName() + "\t" + getSummaryText(summary,m_totalWorkSeconds,true) + "\n";
     }
     else
     {
@@ -395,7 +395,7 @@ QString ProgressModel::totalTime() const
     break;
   }
 
-  return getSummary(summary,QVector<quint64>({0,0}));
+  return getSummaryText(summary,QVector<quint64>({0,0}));
 }
 
 void ProgressModel::itemStateChanged()
@@ -407,7 +407,7 @@ void ProgressModel::itemStateChanged()
     {
       m_dataChanged = true;
       m_progressEntries[i].setItemActive(item->isActive());
-      item->setSummary(getSummary(m_progressEntries[i],m_totalWorkSeconds));
+      item->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
     }
   }
 }
@@ -456,7 +456,7 @@ void ProgressModel::workingTimer()
         if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
         {
           m_progressEntries[i].addWorkInSeconds(m_progressItems.at(j)->selectedAccount(),1);
-          m_progressItems.at(j)->setSummary(getSummary(m_progressEntries[i],m_totalWorkSeconds));
+          m_progressItems.at(j)->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
         }
       }
     }
@@ -578,7 +578,7 @@ void ProgressModel::addSeconds(const int &index, const int &diff)
     {
       m_dataChanged = true;
       item->addWorkInSeconds(m_progressItems.at(index)->selectedAccount(),diff);
-      m_progressItems.at(index)->setSummary(getSummary(*item,QVector<quint64>({0,0})));
+      m_progressItems.at(index)->setSummary(getSummaryText(*item,QVector<quint64>({0,0})));
     }
     ++item;
   }
@@ -679,8 +679,8 @@ void ProgressModel::updateItemsList()
       //entry->m_description = item.m_description;
       //entry->m_isActive = item.m_active;
       //entry->m_timeStamp = item.m_timeStamp;
-      entry->setWorkInSeconds(item.getWorkInSeconds(0));
-      entry->setSummary(getSummary(item,m_totalWorkSeconds));
+      entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+      entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
       //entry->connect(entry,SIGNAL(isActiveChanged()),this,SLOT(itemStateChanged()));
       entry->connect(entry,SIGNAL(projectNameChanged()),this,SLOT(itemNameChanged()));
@@ -702,8 +702,8 @@ void ProgressModel::updateItemsList()
         //entry->m_description = "";
         //entry->m_isActive = false;
         entry->setTimeStamp(item.getTimeStamp());
-        entry->setWorkInSeconds(item.getWorkInSeconds(0));
-        entry->setSummary(getSummary(item,m_totalWorkSeconds));
+        entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+        entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
       }
@@ -723,8 +723,8 @@ void ProgressModel::updateItemsList()
         //entry->m_description = "";
         //entry->m_isActive = false;
         entry->setTimeStamp(item.getTimeStamp());
-        entry->setWorkInSeconds(item.getWorkInSeconds(0));
-        entry->setSummary(getSummary(item,m_totalWorkSeconds));
+        entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+        entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
       }
@@ -741,8 +741,8 @@ void ProgressModel::updateItemsList()
       entry->setIsActive(item.getItemActive());
       entry->setSelectedAccount(item.getItemCurrentAccount());
       entry->setTimeStamp(item.getTimeStamp());
-      entry->setWorkInSeconds(item.getWorkInSeconds(0));
-      entry->setSummary(getSummary(item,m_totalWorkSeconds));
+      entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+      entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
       entry->connect(entry,SIGNAL(isActiveChanged()),this,SLOT(itemStateChanged()));
       entry->connect(entry,SIGNAL(projectNameChanged()),this,SLOT(itemNameChanged()));
@@ -756,17 +756,24 @@ void ProgressModel::updateItemsList()
   emit itemListChanged();
 }
 
-QString ProgressModel::getSummary(const ProgressEntry &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat) const
+quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry) const
 {
-  double percent = 0.0;
-  QString infotext;
-  bool percentEnabled = totalWorkInSeconds[0]>0 || totalWorkInSeconds[1]>0;
-
   quint64 value = 0;
   if( m_showHomeWorkOnly )
     value = entry.getWorkInSeconds(0);
   else
     value = entry.getWorkInSeconds(0) + entry.getWorkInSeconds(1);
+
+  return value;
+}
+
+QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat) const
+{
+  double percent = 0.0;
+  QString infotext;
+  bool percentEnabled = totalWorkInSeconds[0]>0 || totalWorkInSeconds[1]>0;
+
+  quint64 value = getSummaryWorkInSeconds(entry);
 
   if( percentEnabled )
     percent = (double)value*100.0/(double)(totalWorkInSeconds[0]+totalWorkInSeconds[1]); // \todo selection of menu?
