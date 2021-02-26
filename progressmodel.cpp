@@ -788,7 +788,7 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
   case DisplayYear:
     //break;
   case DisplayMonth:
-    infotext = showinPercent ? QString::asprintf(clipboardFormat ? "%1.3f" : "%.0f %%",percent) : QString::asprintf("%4d,%02d h",hours,minutes*10/6);
+    infotext = showinPercent ? QString::asprintf(clipboardFormat ? "%1.3f" : "%.0f %%",percent) : QString::asprintf("%4d.%02d h",hours,minutes*10/6);
     break;
   case DisplayWeek:
     infotext = showinPercent ? QString::asprintf(clipboardFormat ? "%1.3f" : "%.1f %%",percent) : QString::asprintf("%02d:%02d",hours,minutes);
@@ -801,7 +801,7 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
     break;
   }
 
-  return infotext;
+  return infotext.replace(".",",");
 }
 
 void ProgressModel::saveData(const QString &filename, bool createBackup)
