@@ -9,8 +9,8 @@ class ProgressItem;
 class ProgressEntry
 {
 public:
-  ProgressEntry() = default;
-  ProgressEntry(int id, QDateTime timestamp, QString name, QString description, bool active, bool doneHome, quint64 workInSeconds);
+  ProgressEntry();
+  ProgressEntry(int id, QDateTime timestamp, QString name, QString description, bool active, int currentAccount, QVector<quint64> workInSeconds);
   ProgressEntry(int m_id, QString const &fromString);
   QString toString() const;
 
@@ -28,21 +28,24 @@ public:
   bool getItemActive() const;
   void setItemActive(const bool &);
 
-  bool getItemDoneHome() const;
-  void setItemDoneHome(const bool &);
+  int getItemCurrentAccount() const;
+  void setItemCurrentAccount(const int &);
 
-  quint64 getWorkInSeconds() const;
-  void setWorkInSeconds(const quint64 &);
-  void addWorkInSeconds(const quint64 &);
+  QVector<quint64> getAllWorkInSeconds() const;
+  void addAllWorkInSeconds(const QVector<quint64> &);
+
+  quint64 getWorkInSeconds(const int &) const;
+  void setWorkInSeconds(const int &,const quint64 &);
+  void addWorkInSeconds(const int &,const quint64 &);
 
 private:
-  int m_id;
-  QDateTime m_timeStamp;
-  QString m_name;
-  QString m_description;
-  bool    m_active;
-  bool    m_doneHome;
-  quint64 m_workInSeconds;
+  int m_id                          = 0;
+  QDateTime m_timeStamp             = QDateTime::currentDateTime();
+  QString m_name                    = "";
+  QString m_description             = "";
+  bool    m_active                  = false;
+  int     m_account                 = 0;
+  QVector<quint64> m_workInSeconds  = {0,0};
 };
 
 class ProgressModel : public QObject
@@ -99,8 +102,8 @@ public:
   Q_SLOT void itemStateChanged();
   Q_SLOT void itemNameChanged();
   Q_SLOT void itemDescriptionChanged();
-  Q_SLOT void itemDoneHomeChanged();
-  Q_SLOT void itemWorkInSecondsChanged();
+  Q_SLOT void itemAccountChanged();
+  //Q_SLOT void itemWorkInSecondsChanged();
   Q_SLOT void workingTimer();
 
   Q_SIGNAL void actualDateChanged();
@@ -127,6 +130,7 @@ public:
 
   Q_INVOKABLE void append(const QString &name, const QString &description, const QDateTime &timeSpent);
   Q_INVOKABLE void remove(const int &index);
+  Q_INVOKABLE void addSeconds(const int &index,const int &diff);
 
   Q_INVOKABLE void setLanguage(const int &);
 
@@ -137,7 +141,7 @@ private:
   QString humanReadableMonth(int month);
   QString humanReadableWeekDay(int weekday);
 
-  QString getSummary(ProgressEntry const &entry, quint64 totalWorkInSeconds) const;
+  QString getSummary(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;
 
   void saveData(QString const &filename, bool createBackup = false);
 
@@ -145,18 +149,18 @@ private:
   QList<ProgressEntry> m_progressEntries;
   QList<ProgressItem*> m_progressItems;
 
-  int m_nextId                    = 12345678;
+  int m_nextId                        = 12345678;
 
-  OperatingMode m_operatingMode   = DisplayRecordDay;
-  bool m_isChangeable             = true;
-  bool m_alwaysShowWork           = false;
-  bool m_showHomeWorkOnly         = false;
+  OperatingMode m_operatingMode       = DisplayRecordDay;
+  bool m_isChangeable                 = true;
+  bool m_alwaysShowWork               = false;
+  bool m_showHomeWorkOnly             = false;
 
-  quint64 m_totalWorkSeconds      = 0;
-  bool m_showSummariesInPercent   = false;
+  QVector<quint64> m_totalWorkSeconds = { 0,0 };
+  bool m_showSummariesInPercent       = false;
 
-  quint64 m_runningSeconds        = 0;
-  bool m_dataChanged              = false;
+  quint64 m_runningSeconds            = 0;
+  bool m_dataChanged                  = false;
 };
 
 class ProgressItem : public QObject
@@ -165,7 +169,7 @@ class ProgressItem : public QObject
   Q_PROPERTY(QString projectName READ projectName WRITE setProjectName NOTIFY projectNameChanged)
   Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
   Q_PROPERTY(bool isActive READ isActive WRITE setIsActive NOTIFY isActiveChanged)
-  Q_PROPERTY(bool isDoneHome READ isDoneHome WRITE setIsDoneHome NOTIFY isDoneHomeChanged)
+  Q_PROPERTY(int selectedAccount READ selectedAccount WRITE setSelectedAccount NOTIFY selectedAccountChanged)
   Q_PROPERTY(QDateTime timeStamp READ timeStamp WRITE setTimeStamp NOTIFY timeStampChanged)
   Q_PROPERTY(qint64 workInSeconds READ workInSeconds WRITE setWorkInSeconds NOTIFY workInSecondsChanged)
   Q_PROPERTY(QString summary READ summary WRITE setSummary NOTIFY summaryChanged)
@@ -187,8 +191,8 @@ public:
   bool isActive() const;
   void setIsActive(const bool &);
 
-  bool isDoneHome() const;
-  void setIsDoneHome(const bool &);
+  int selectedAccount() const;
+  void setSelectedAccount(const int &);
 
   QDateTime timeStamp() const;
   void setTimeStamp(const QDateTime &);
@@ -202,7 +206,7 @@ public:
   Q_SIGNAL void projectNameChanged();
   Q_SIGNAL void descriptionChanged();
   Q_SIGNAL void isActiveChanged();
-  Q_SIGNAL void isDoneHomeChanged();
+  Q_SIGNAL void selectedAccountChanged();
   Q_SIGNAL void timeStampChanged();
   Q_SIGNAL void workInSecondsChanged();
   Q_SIGNAL void summaryChanged();
@@ -212,7 +216,7 @@ private:
   QString m_projectName   = "";
   QString m_description   = "";
   bool m_isActive         = false;
-  bool m_doneAtHome       = true;
+  int m_selectedAccount   = 0;
   QDateTime m_timeStamp   = QDateTime::currentDateTime();
   qint64 m_workInSeconds  = 0;
   QString m_summaryText   = 0;

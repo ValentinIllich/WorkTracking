@@ -88,10 +88,24 @@ ItemDelegate {
 
     }
 
+    function currentAccount()
+    {
+        return model.selectedAccount
+    }
+
+    function accountChanged(account)
+    {
+        model.selectedAccount = account
+    }
+
     onClicked: ListView.view.currentIndex = index
 
     contentItem: ColumnLayout {
         spacing: 0
+        ToolTip.delay: 1000
+        ToolTip.timeout: 2000
+        ToolTip.visible: hovered && !root.checked && projectData.isChangeable
+        ToolTip.text: qsTr("click to open")
 
         RowLayout {
             ColumnLayout {
@@ -126,23 +140,26 @@ ItemDelegate {
             }
         }
 
+        ComboBox {
+            Layout.fillWidth: true
+            visible: root.checked && projectData.isChangeable
+            onActivated: accountChanged(currentIndex)
+            Component.onCompleted: currentIndex = currentAccount()
+            model: {
+                [ qsTr("working at home"), qsTr("working in office") ]
+            }
+        }
+
         RowLayout {
             id: editFields
             ColumnLayout {
                 id: projectproperties
 
-                CheckBox {
-                    id: isHomeworkCheck
-                    visible: root.checked
-                    text: qsTr("work is done at home")
-                    Component.onCompleted: checked = model.isDoneHome
-                    onCheckedChanged: model.isDoneHome = checked
-                }
                 TextField {
                     id: nameTextField
                     placeholderText: qsTr("Enter name here")
                     cursorVisible: true
-                    visible: root.checked
+                    visible: root.checked && projectData.isChangeable
                     text: model.projectName
                     onTextEdited: model.projectName = text
                 }
@@ -150,7 +167,7 @@ ItemDelegate {
                     id: descriptionTextField
                     placeholderText: qsTr("Enter description here")
                     cursorVisible: true
-                    visible: root.checked
+                    visible: root.checked && projectData.isChangeable
                     text: model.description
                     onTextEdited: model.description = text
                 }
@@ -174,7 +191,7 @@ ItemDelegate {
                 Button {
                     text: qsTr("Add")
                     visible: root.checked && projectData.isChangeable
-                    onClicked: model.workInSeconds = model.workInSeconds + (correctionTumbler.currentIndex-6)*60*5
+                    onClicked: projectData.addSeconds(root.ListView.view.currentIndex,(correctionTumbler.currentIndex-6)*60*5)
                 }
                 Tumbler {
                     // 0    1   2   3   4   5   6   7   8   9   10  11  12  thumbler index

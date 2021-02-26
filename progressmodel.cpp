@@ -2,20 +2,32 @@
 
 QQmlEngine *m_qmlEngine;
 
-ProgressEntry::ProgressEntry(int id, QDateTime timestamp, QString name, QString description, bool active, bool doneHome, quint64 workInSeconds)
-  : m_id(id)
-  , m_timeStamp(timestamp)
-  , m_name(name)
-  , m_description(description)
-  , m_active(active)
-  , m_doneHome(doneHome)
-  , m_workInSeconds(workInSeconds)
-
+ProgressEntry::ProgressEntry()
 {
+  QDateTime timestamp = m_timeStamp;
+  timestamp.time().setHMS(0,0,0);
+  m_timeStamp = timestamp;
+}
+
+ProgressEntry::ProgressEntry(int id, QDateTime timestamp, QString name, QString description, bool active, int currentAccount, QVector<quint64> workInSeconds)
+  : ProgressEntry()
+{
+  m_id = id;
+  m_timeStamp = timestamp;
+  m_name = name;
+  m_description = description;
+  m_active = active;
+  m_account = currentAccount;
+  m_workInSeconds = workInSeconds;
+  if( m_workInSeconds.size()<2 )
+    m_workInSeconds.push_back(0);
 }
 
 ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
+  : ProgressEntry()
 {
+  int workIndex = 0;
+
   QStringList properties = fromString.split(";");
   if( properties[0].contains("=") )
   {
@@ -30,10 +42,14 @@ ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
       if( item.contains("creat=") )
         m_timeStamp = QDateTime::fromSecsSinceEpoch(item.mid(6).toLongLong());;
       if( item.contains("spent=") )
-        m_workInSeconds = item.midRef(6).toULongLong();
+      {
+        if( workIndex==m_workInSeconds.size() )
+          m_workInSeconds.push_back(item.midRef(6).toULongLong());
+        else
+          m_workInSeconds[workIndex] = item.midRef(6).toULongLong();
+        workIndex++;
+      }
     }
-    m_active = false;
-    m_doneHome = false;
   }
   else
   {
@@ -43,8 +59,7 @@ ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
     m_name = properties[1];
     m_description = properties[2];
     m_active = false;
-    m_doneHome = properties.count()==6 ? (properties[5]=="h") : true;
-    m_workInSeconds = properties[4].toULongLong();
+    m_workInSeconds[0] = properties[4].toULongLong();
   }
 }
 
@@ -54,7 +69,8 @@ QString ProgressEntry::toString() const
           + "title=" +                    m_name + ";"
           + "descr=" +                    m_description + ";"
           + "creat=" +    QString::number(m_timeStamp.toSecsSinceEpoch()) + ";"
-          + "spent=" +    QString::number(m_workInSeconds);// + ";"
+          + "spent=" +    QString::number(m_workInSeconds[0]) + ";"
+          + "spent=" +    QString::number(m_workInSeconds[1]);// + ";"
            //"" +                   (m_doneHome ? "h" : "o");
 }
 
@@ -103,29 +119,45 @@ void ProgressEntry::setItemActive(const bool &active)
   m_active = active;
 }
 
-bool ProgressEntry::getItemDoneHome() const
+int ProgressEntry::getItemCurrentAccount() const
 {
-  return m_doneHome;
+  return m_account;
 }
 
-void ProgressEntry::setItemDoneHome(const bool &done)
+void ProgressEntry::setItemCurrentAccount(const int &account)
 {
-  m_doneHome = done;
+  m_account = account;
 }
 
-quint64 ProgressEntry::getWorkInSeconds() const
+QVector<quint64> ProgressEntry::getAllWorkInSeconds() const
 {
   return m_workInSeconds;
 }
 
-void ProgressEntry::setWorkInSeconds(const quint64 &work)
+void ProgressEntry::addAllWorkInSeconds(const QVector<quint64> &work)
 {
-  m_workInSeconds = work;
+  for( int i=0; i<work.size(); i++ )
+    m_workInSeconds[i] += work[i];
 }
 
-void ProgressEntry::addWorkInSeconds(const quint64 &work)
+quint64 ProgressEntry::getWorkInSeconds(const int &typeOfWork) const
 {
-  m_workInSeconds += work;
+  if (typeOfWork<m_workInSeconds.size())
+    return m_workInSeconds[typeOfWork];
+  else
+    return 0;
+}
+
+void ProgressEntry::setWorkInSeconds(const int &typeOfWork,const quint64 &work)
+{
+  while (m_workInSeconds.size()<typeOfWork) m_workInSeconds.push_back(0);
+  m_workInSeconds[typeOfWork] = work;
+}
+
+void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const quint64 &work)
+{
+  while (m_workInSeconds.size()<typeOfWork) m_workInSeconds.push_back(0);
+  m_workInSeconds[typeOfWork] += work;
 }
 
 ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
@@ -161,15 +193,13 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   if( todayListIsEmpty )
   {
-    QDateTime timeStamp = QDateTime::currentDateTime();
-    timeStamp.time().setHMS(0,0,0);
-    m_progressEntries << ProgressEntry(m_nextId++,"0;Wideband;;"+QString::number(timeStamp.toSecsSinceEpoch())+";0;h");
-    m_progressEntries << ProgressEntry{m_nextId++,"0;NRPxP;;"+QString::number(timeStamp.toSecsSinceEpoch())+";0;h"};
-    m_progressEntries << ProgressEntry{m_nextId++,"0;NRX Pflege;;"+QString::number(timeStamp.toSecsSinceEpoch())+";0;h"};
-    m_progressEntries << ProgressEntry{m_nextId++,"0;NRP Pflege;;"+QString::number(timeStamp.toSecsSinceEpoch())+";0;h"};
-    m_progressEntries << ProgressEntry{m_nextId++,"0;Audio;;"+QString::number(timeStamp.toSecsSinceEpoch())+";0;h"};
-    m_progressEntries << ProgressEntry{m_nextId++,"0;NRPM;;"+QString::number(timeStamp.toSecsSinceEpoch())+";0;h"};
-    m_progressEntries << ProgressEntry{m_nextId++,"0;Allgemein;;"+QString::number(timeStamp.toSecsSinceEpoch())+";0;h"};
+    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=Wideband");
+    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRPxP");
+    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRX Pflege");
+    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRP Pflege");
+    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=Audio");
+    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRPM");
+    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=Allgemein");
   }
   updateItemsList();
 }
@@ -213,23 +243,19 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
   QClipboard *clipboard = QGuiApplication::clipboard();
   QString data;
 
-  for( auto item : qAsConst(m_progressItems) )
+  for( const auto item : qAsConst(m_progressItems) )
   {
-    if( m_showSummariesInPercent )
+    if( m_showSummariesInPercent || m_operatingMode!=DisplayWeek )
     {
-      quint64 timespent = item->workInSeconds();
-      double percent = double(timespent)*100.0/double(m_totalWorkSeconds);
-      data += item->projectName() + "\t" + QString::asprintf("%1.3f",percent).replace(".",",") + "\n";
-
-      qDebug(" export %s,%1.3f\n",item->projectName().toLatin1().data(),percent);
+      ProgressEntry summary;
+      summary.addWorkInSeconds(0,item->workInSeconds());
+      data += item->projectName() + "\t" + getSummary(summary,m_totalWorkSeconds,true) + "\n";
     }
     else
     {
       quint64 timespent = item->workInSeconds();
       if( timespent>(thresholdHours.toULong()*3600) )
         timespent += additionalMinutes.toULong()*60;
-
-      qDebug(" export %s,%lld\n",item->projectName().toLatin1().data(),timespent);
 
       timespent += 150; // round in range of 5 minutes
       timespent = (timespent / 300) * 300;
@@ -253,7 +279,6 @@ QString ProgressModel::humanReadableMonth(int month)
     tr("July"),tr("August"),tr("September"),tr("October"),tr("November"),tr("December")
   };
   return s_months[month];
-  //return QCoreApplication::translate("mainTranslation", s_months[month].toLatin1().data());
 }
 QString ProgressModel::humanReadableWeekDay(int weekday)
 {
@@ -261,7 +286,6 @@ QString ProgressModel::humanReadableWeekDay(int weekday)
     tr("Monday"),tr("Tuesday"),tr("Wednesday"),tr("Thursday"),tr("Friday"),tr("Saturday"),tr("Sunday")
   };
   return s_days[weekday];
-  //return QCoreApplication::translate("mainTranslation", s_days[weekday].toLatin1().data());
 }
 
 QString ProgressModel::title()
@@ -309,10 +333,10 @@ bool ProgressModel::showHomeWorkOnly() const
 
 void ProgressModel::setShowHomeWorkOnly(const bool &homeWorkOnly)
 {
-  qDebug("++++\n");
   m_showHomeWorkOnly = homeWorkOnly;
   updateItemsList();
   emit showHomeWorkOnlyChanged();
+  emit totalTimeChanged();
 }
 
 QQmlListProperty<ProgressItem> ProgressModel::itemList()
@@ -336,11 +360,11 @@ void ProgressModel::changeLanguage(int language)
 
   // 1 - german
   if( language==1 )
-    loaded = translator.load(":/translations/projects_de.qm");
+    loaded = translator.load(":/translations/workTracking_de.qm");
 
   // 2 - french
   if( language==2 )
-    loaded = translator.load(":/translations/projects_fr.qm");
+    loaded = translator.load(":/translations/workTracking_fr.qm");
 
   if ( loaded )
     QCoreApplication::installTranslator(&translator);
@@ -350,13 +374,14 @@ QString ProgressModel::totalTime() const
 {
   ProgressEntry summary;
   summary.setItemActive(false);
-  summary.setWorkInSeconds(0);
+  summary.setWorkInSeconds(0,0);
   switch( m_operatingMode )
   {
   case DisplayYear:
   case DisplayMonth:
   case DisplayWeek:
-    summary.setWorkInSeconds(m_totalWorkSeconds);
+    summary.setWorkInSeconds(0,m_totalWorkSeconds[0]);
+    summary.setWorkInSeconds(1,m_totalWorkSeconds[1]);
     break;
   case DisplayRecordDay:
     for( int i=0; i<m_progressEntries.size(); i++ )
@@ -364,13 +389,13 @@ QString ProgressModel::totalTime() const
       for( int j=0; j<m_progressItems.size(); j++ )
       {
         if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
-          summary.addWorkInSeconds(m_progressEntries[i].getWorkInSeconds());
+          summary.addAllWorkInSeconds(m_progressEntries[i].getAllWorkInSeconds());
       }
     }
     break;
   }
 
-  return getSummary(summary,0);
+  return getSummary(summary,QVector<quint64>({0,0}));
 }
 
 void ProgressModel::itemStateChanged()
@@ -409,36 +434,14 @@ void ProgressModel::itemDescriptionChanged()
   }
 }
 
-void ProgressModel::itemDoneHomeChanged()
+void ProgressModel::itemAccountChanged()
 {
   ProgressItem *item = static_cast<ProgressItem*>(sender());
   for( int i=0; i<m_progressEntries.size(); i++ )
   {
-    m_dataChanged = true;
     if( m_progressEntries[i].getId()==item->getId() )
-      m_progressEntries[i].setItemDoneHome(item->isDoneHome());
+      m_progressEntries[i].setItemCurrentAccount(item->selectedAccount());
   }
-}
-
-void ProgressModel::itemWorkInSecondsChanged()
-{
-  qDebug("+++thats it\n");
-  ProgressItem *item = static_cast<ProgressItem*>(sender());
-  for( int i=0; i<m_progressEntries.size(); i++ )
-  {
-    if( m_progressEntries[i].getId()==item->getId() )
-    {
-      m_dataChanged = true;
-      m_progressEntries[i].setWorkInSeconds(item->workInSeconds());
-      for( int j=0; j<m_progressItems.size(); j++ )
-      {
-        if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
-          m_progressItems.at(j)->setSummary(getSummary(m_progressEntries[i],0));
-      }
-    }
-  }
-
-  emit totalTimeChanged();
 }
 
 void ProgressModel::workingTimer()
@@ -448,11 +451,13 @@ void ProgressModel::workingTimer()
     if( m_progressEntries[i].getItemActive() )
     {
       m_dataChanged = true;
-      m_progressEntries[i].addWorkInSeconds(1);
       for( int j=0; j<m_progressItems.size(); j++ )
       {
         if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
+        {
+          m_progressEntries[i].addWorkInSeconds(m_progressItems.at(j)->selectedAccount(),1);
           m_progressItems.at(j)->setSummary(getSummary(m_progressEntries[i],m_totalWorkSeconds));
+        }
       }
     }
   }
@@ -535,9 +540,9 @@ void ProgressModel::append(const QString &name, const QString &description, cons
   QDateTime newTimeStamp = m_actualDate;
   newTimeStamp.setTime(timeSpent.time());
 
-  ProgressEntry item {m_nextId++,newTimeStamp,name,description,true,true,0};
+  ProgressEntry item {m_nextId++,newTimeStamp,name,description,true,0,{0,0}};
 
-  item.setWorkInSeconds(timeSpent.time().hour()*3600 + timeSpent.time().minute()*60);
+  item.setWorkInSeconds(0,timeSpent.time().hour()*3600 + timeSpent.time().minute()*60);
   m_progressEntries << item;
 
   updateItemsList();
@@ -558,6 +563,26 @@ void ProgressModel::remove(const int &index)
   }
 
   updateItemsList();
+  emit totalTimeChanged();
+}
+
+void ProgressModel::addSeconds(const int &index, const int &diff)
+{
+  qDebug("addseconds");
+  int id = m_progressItems.at(index)->getId();
+
+  QList<ProgressEntry>::iterator item = m_progressEntries.begin();
+  while( item!=m_progressEntries.end() )
+  {
+    if( item->getId()==id )
+    {
+      m_dataChanged = true;
+      item->addWorkInSeconds(m_progressItems.at(index)->selectedAccount(),diff);
+      m_progressItems.at(index)->setSummary(getSummary(*item,QVector<quint64>({0,0})));
+    }
+    ++item;
+  }
+
   emit totalTimeChanged();
 }
 
@@ -586,7 +611,9 @@ void ProgressModel::updateItemsList()
   QMap<int,ProgressEntry> weekDayMap;
   QList<ProgressEntry> dayList;
 
-  m_totalWorkSeconds = 0;
+  m_totalWorkSeconds.clear();
+  m_totalWorkSeconds.push_back(0);
+  m_totalWorkSeconds.push_back(0);
   for( const auto &item : qAsConst(m_progressEntries) )
   {
     switch( m_operatingMode )
@@ -594,57 +621,50 @@ void ProgressModel::updateItemsList()
     case DisplayYear:
       if( item.getTimeStamp().date().year()!=m_actualDate.date().year() )
         continue;
-      if( m_showHomeWorkOnly && !item.getItemDoneHome() )
-        continue;
       if( m_alwaysShowWork )
       {
         if( !projectsMap.contains(item.getItemName()) )
-          projectsMap[item.getItemName()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,false,0};
-        projectsMap[item.getItemName()].addWorkInSeconds(item.getWorkInSeconds());
+          projectsMap[item.getItemName()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
+        projectsMap[item.getItemName()].addAllWorkInSeconds(item.getAllWorkInSeconds());
       }
       else
       {
         if( !monthsMap.contains(item.getTimeStamp().date().month()) )
-          monthsMap[item.getTimeStamp().date().month()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,false,0};
-        monthsMap[item.getTimeStamp().date().month()].addWorkInSeconds(item.getWorkInSeconds());
+          monthsMap[item.getTimeStamp().date().month()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
+        monthsMap[item.getTimeStamp().date().month()].addAllWorkInSeconds(item.getAllWorkInSeconds());
       }
       break;
     case DisplayMonth:
       if( item.getTimeStamp().date().month()!=m_actualDate.date().month() )
         continue;
-      if( m_showHomeWorkOnly && !item.getItemDoneHome() )
-        continue;
       if( !projectsMap.contains(item.getItemName()) )
-        projectsMap[item.getItemName()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,false,0};
-      projectsMap[item.getItemName()].addWorkInSeconds(item.getWorkInSeconds());
+        projectsMap[item.getItemName()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
+      projectsMap[item.getItemName()].addAllWorkInSeconds(item.getAllWorkInSeconds());
       break;
     case DisplayWeek:
       if( item.getTimeStamp().date().weekNumber()!=m_actualDate.date().weekNumber())
         continue;
-      if( m_showHomeWorkOnly && !item.getItemDoneHome() )
-        continue;
       if( m_alwaysShowWork )
       {
         if( !projectsMap.contains(item.getItemName()) )
-          projectsMap[item.getItemName()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,false,0};
-        projectsMap[item.getItemName()].addWorkInSeconds(item.getWorkInSeconds());
+          projectsMap[item.getItemName()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
+        projectsMap[item.getItemName()].addAllWorkInSeconds(item.getAllWorkInSeconds());
       }
       else
       {
         if( !weekDayMap.contains(item.getTimeStamp().date().dayOfWeek()) )
-          weekDayMap[item.getTimeStamp().date().dayOfWeek()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,false,0};
-        weekDayMap[item.getTimeStamp().date().dayOfWeek()].addWorkInSeconds(item.getWorkInSeconds());
+          weekDayMap[item.getTimeStamp().date().dayOfWeek()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
+        weekDayMap[item.getTimeStamp().date().dayOfWeek()].addAllWorkInSeconds(item.getAllWorkInSeconds());
       }
       break;
     case DisplayRecordDay:
       if( item.getTimeStamp().date()!=m_actualDate.date() )
         continue;
-      if( m_showHomeWorkOnly && !item.getItemDoneHome() )
-        continue;
-      dayList << ProgressEntry{item.getId(),item.getTimeStamp(), item.getItemName(),item.getItemDescription(),item.getItemActive(),item.getItemDoneHome(),item.getWorkInSeconds()};
+      dayList << ProgressEntry(item.getId(),item.getTimeStamp(), item.getItemName(),item.getItemDescription(),item.getItemActive(),item.getItemCurrentAccount(),item.getAllWorkInSeconds());
       break;
     }
-    m_totalWorkSeconds += item.getWorkInSeconds();
+    m_totalWorkSeconds[0] += item.getWorkInSeconds(0);
+    m_totalWorkSeconds[1] += item.getWorkInSeconds(1);
   }
 
   if( projectsMap.size()>0 )
@@ -659,10 +679,10 @@ void ProgressModel::updateItemsList()
       //entry->m_description = item.m_description;
       //entry->m_isActive = item.m_active;
       //entry->m_timeStamp = item.m_timeStamp;
-      entry->setWorkInSeconds(item.getWorkInSeconds());
+      entry->setWorkInSeconds(item.getWorkInSeconds(0));
       entry->setSummary(getSummary(item,m_totalWorkSeconds));
 
-      entry->connect(entry,SIGNAL(isActiveChanged()),this,SLOT(itemStateChanged()));
+      //entry->connect(entry,SIGNAL(isActiveChanged()),this,SLOT(itemStateChanged()));
       entry->connect(entry,SIGNAL(projectNameChanged()),this,SLOT(itemNameChanged()));
       entry->connect(entry,SIGNAL(descriptionChanged()),this,SLOT(itemDescriptionChanged()));
       m_progressItems << entry;
@@ -682,7 +702,7 @@ void ProgressModel::updateItemsList()
         //entry->m_description = "";
         //entry->m_isActive = false;
         entry->setTimeStamp(item.getTimeStamp());
-        entry->setWorkInSeconds(item.getWorkInSeconds());
+        entry->setWorkInSeconds(item.getWorkInSeconds(0));
         entry->setSummary(getSummary(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
@@ -703,7 +723,7 @@ void ProgressModel::updateItemsList()
         //entry->m_description = "";
         //entry->m_isActive = false;
         entry->setTimeStamp(item.getTimeStamp());
-        entry->setWorkInSeconds(item.getWorkInSeconds());
+        entry->setWorkInSeconds(item.getWorkInSeconds(0));
         entry->setSummary(getSummary(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
@@ -719,16 +739,16 @@ void ProgressModel::updateItemsList()
       entry->setProjectName(item.getItemName());
       entry->setDescription(item.getItemDescription());
       entry->setIsActive(item.getItemActive());
-      entry->setIsDoneHome(item.getItemDoneHome());
+      entry->setSelectedAccount(item.getItemCurrentAccount());
       entry->setTimeStamp(item.getTimeStamp());
-      entry->setWorkInSeconds(item.getWorkInSeconds());
+      entry->setWorkInSeconds(item.getWorkInSeconds(0));
       entry->setSummary(getSummary(item,m_totalWorkSeconds));
 
       entry->connect(entry,SIGNAL(isActiveChanged()),this,SLOT(itemStateChanged()));
       entry->connect(entry,SIGNAL(projectNameChanged()),this,SLOT(itemNameChanged()));
       entry->connect(entry,SIGNAL(descriptionChanged()),this,SLOT(itemDescriptionChanged()));
-      entry->connect(entry,SIGNAL(isDoneHomeChanged()),this,SLOT(itemDoneHomeChanged()));
-      entry->connect(entry,SIGNAL(workInSecondsChanged()),this,SLOT(itemWorkInSecondsChanged()));
+      entry->connect(entry,SIGNAL(selectedAccountChanged()),this,SLOT(itemAccountChanged()));
+      //entry->connect(entry,SIGNAL(workInSecondsChanged()),this,SLOT(itemWorkInSecondsChanged()));
       m_progressItems << entry;
     }
   }
@@ -736,16 +756,22 @@ void ProgressModel::updateItemsList()
   emit itemListChanged();
 }
 
-QString ProgressModel::getSummary(const ProgressEntry &entry, quint64 totalWorkInSeconds) const
+QString ProgressModel::getSummary(const ProgressEntry &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat) const
 {
   double percent = 0.0;
   QString infotext;
+  bool percentEnabled = totalWorkInSeconds[0]>0 || totalWorkInSeconds[1]>0;
 
-  if( totalWorkInSeconds>0 )
-    percent = (double)entry.getWorkInSeconds()*100.0/(double)totalWorkInSeconds;
-  bool showinPercent = m_showSummariesInPercent && (totalWorkInSeconds>0);
+  quint64 value = 0;
+  if( m_showHomeWorkOnly )
+    value = entry.getWorkInSeconds(0);
+  else
+    value = entry.getWorkInSeconds(0) + entry.getWorkInSeconds(1);
 
-  quint64 value = entry.getWorkInSeconds();
+  if( percentEnabled )
+    percent = (double)value*100.0/(double)(totalWorkInSeconds[0]+totalWorkInSeconds[1]); // \todo selection of menu?
+  bool showinPercent = m_showSummariesInPercent && (percentEnabled);
+
   int seconds = value % 60; value /= 60;
   int minutes = value % 60; value /= 60;
   int hours = value;
@@ -755,10 +781,10 @@ QString ProgressModel::getSummary(const ProgressEntry &entry, quint64 totalWorkI
   case DisplayYear:
     //break;
   case DisplayMonth:
-    infotext = showinPercent ? QString::asprintf("%.0f %%",percent) : QString::asprintf("%4d,%02d h",hours,minutes*10/6);
+    infotext = showinPercent ? QString::asprintf(clipboardFormat ? "%1.3f" : "%.0f %%",percent) : QString::asprintf("%4d,%02d h",hours,minutes*10/6);
     break;
   case DisplayWeek:
-    infotext = showinPercent ? QString::asprintf("%.1f %%",percent) : QString::asprintf("%02d:%02d",hours,minutes);
+    infotext = showinPercent ? QString::asprintf(clipboardFormat ? "%1.3f" : "%.1f %%",percent) : QString::asprintf("%02d:%02d",hours,minutes);
     break;
   case DisplayRecordDay:
     if( entry.getItemActive() )
@@ -805,14 +831,6 @@ ProgressItem::ProgressItem()
 {
 }
 
-//ProgressItem::ProgressItem(const ProgressItem &src) : QObject()
-//{
-//    m_projectName = src.m_projectName;
-//    m_isActive = src.m_isActive;
-//    m_timeStamp = src.m_timeStamp;
-//    m_summaryText = "";
-//}
-
 ProgressItem::~ProgressItem()
 {
 }
@@ -836,7 +854,6 @@ void ProgressItem::setProjectName(const QString &name)
 {
   m_projectName = name;
   emit projectNameChanged();
-  qDebug("++++setProjectName called!");
 }
 
 QString ProgressItem::description() const
@@ -859,18 +876,17 @@ void ProgressItem::setIsActive(const bool &active)
 {
   m_isActive = active;
   emit isActiveChanged();
-  qDebug("++++active called!");
 }
 
-bool ProgressItem::isDoneHome() const
+int ProgressItem::selectedAccount() const
 {
-  return m_doneAtHome;
+  return m_selectedAccount;
 }
 
-void ProgressItem::setIsDoneHome(const bool &home)
+void ProgressItem::setSelectedAccount(const int &home)
 {
-  m_doneAtHome = home;
-  emit isDoneHomeChanged();
+  m_selectedAccount = home;
+  emit selectedAccountChanged();
 }
 
 QDateTime ProgressItem::timeStamp() const
