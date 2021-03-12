@@ -133,6 +133,7 @@ public:
   Q_INVOKABLE void addSeconds(const int &index,const int &diff);
 
   Q_INVOKABLE void setLanguage(const int &);
+  Q_INVOKABLE void createDefaultList();
 
   static void setQmlEngine(QQmlApplicationEngine &engine);
 

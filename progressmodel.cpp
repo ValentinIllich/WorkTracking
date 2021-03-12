@@ -23,10 +23,12 @@ ProgressEntry::ProgressEntry(int id, QDateTime timestamp, QString name, QString 
     m_workInSeconds.push_back(0);
 }
 
-ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
+ProgressEntry::
+ProgressEntry(int itemId, const QString &fromString)
   : ProgressEntry()
 {
   int workIndex = 0;
+  m_id = itemId;
 
   QStringList properties = fromString.split(";");
   if( properties[0].contains("=") )
@@ -34,7 +36,7 @@ ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
     for( const auto &item : qAsConst(properties) )
     {
       if( item.contains("itmid=") )
-        m_id = (itemId==-1 ? item.midRef(6).toInt() : itemId);
+        m_id = item.midRef(6).toInt();
       if( item.contains("title=") )
         m_name = item.mid(6);
       if( item.contains("descr=") )
@@ -188,7 +190,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   bool todayListIsEmpty = true;
 
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","EcosClient")+"workingOnProjects.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"workingOnProjects.csv";
   QFile file(dataFile);
   file.open(QFile::ReadOnly);
   QTextStream s(&file);
@@ -203,13 +205,15 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   if( todayListIsEmpty )
   {
-    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=Wideband");
-    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRPxP");
-    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRX Pflege");
-    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRP Pflege");
-    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=Audio");
-    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=NRPM");
-    m_progressEntries << ProgressEntry(m_nextId++,"itmid=0;title=Allgemein");
+    QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"defaultItems.csv";
+    QFile file(dataFile);
+    file.open(QFile::ReadOnly);
+    QTextStream s(&file);
+    while( !s.atEnd() )
+    {
+      m_progressEntries <<  ProgressEntry(m_nextId++,s.readLine());
+    }
+
   }
   updateItemsList();
 }
@@ -613,6 +617,19 @@ void ProgressModel::setLanguage(const int &lang)
   emit languageChanged();
 }
 
+void ProgressModel::createDefaultList()
+{
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"/defaultItems.csv";
+
+  QFile file(dataFile);
+  file.open(QFile::WriteOnly);
+  QTextStream s(&file);
+  for( const auto &entry : qAsConst(m_progressItems) )
+  {
+    s << "title=" << entry->projectName() << ";descr=" << entry->description() << endl;
+  }
+}
+
 void ProgressModel::setQmlEngine(QQmlApplicationEngine &engine)
 {
   m_qmlEngine = &engine;
@@ -822,8 +839,8 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
 
 void ProgressModel::saveData(const QString &filename, bool createBackup)
 {
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","EcosClient")+"/"+filename+".csv";
-  QString dataBackup = getConfigurationsPath("config-valentins-qtsolutions","EcosClient")+"/"+filename+"-backup.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"/"+filename+".csv";
+  QString dataBackup = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"/"+filename+"-backup.csv";
 
   if( createBackup )
   {

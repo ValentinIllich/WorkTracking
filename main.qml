@@ -168,6 +168,7 @@ ApplicationWindow {
         MenuItem {
             width: windowWidth // needed for language changes
             text: qsTr("Create default from list")
+            onTriggered: projectData.createDefaultList()
         }
         MenuSeparator {
             width: windowWidth // needed for language changes

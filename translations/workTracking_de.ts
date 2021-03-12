@@ -11,112 +11,112 @@
 <context>
     <name>ProgressModel</name>
     <message>
-        <location filename="../progressmodel.cpp" line="288"/>
+        <location filename="../progressmodel.cpp" line="292"/>
         <source>January</source>
         <translation>Januar</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="288"/>
+        <location filename="../progressmodel.cpp" line="292"/>
         <source>February</source>
         <translation>Februar</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="288"/>
+        <location filename="../progressmodel.cpp" line="292"/>
         <source>March</source>
         <translation>März</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="288"/>
+        <location filename="../progressmodel.cpp" line="292"/>
         <source>April</source>
         <translation>April</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="288"/>
+        <location filename="../progressmodel.cpp" line="292"/>
         <source>May</source>
         <translation>Mai</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="288"/>
+        <location filename="../progressmodel.cpp" line="292"/>
         <source>June</source>
         <translation>Juni</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="289"/>
+        <location filename="../progressmodel.cpp" line="293"/>
         <source>July</source>
         <translation>Juli</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="289"/>
+        <location filename="../progressmodel.cpp" line="293"/>
         <source>August</source>
         <translation>August</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="289"/>
+        <location filename="../progressmodel.cpp" line="293"/>
         <source>September</source>
         <translation>September</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="289"/>
+        <location filename="../progressmodel.cpp" line="293"/>
         <source>October</source>
         <translation>Oktober</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="289"/>
+        <location filename="../progressmodel.cpp" line="293"/>
         <source>November</source>
         <translation>November</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="289"/>
+        <location filename="../progressmodel.cpp" line="293"/>
         <source>December</source>
         <translation>Dezember</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="296"/>
+        <location filename="../progressmodel.cpp" line="300"/>
         <source>Monday</source>
         <translation>Montag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="296"/>
+        <location filename="../progressmodel.cpp" line="300"/>
         <source>Tuesday</source>
         <translation>Dienstag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="296"/>
+        <location filename="../progressmodel.cpp" line="300"/>
         <source>Wednesday</source>
         <translation>Mittwoch</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="296"/>
+        <location filename="../progressmodel.cpp" line="300"/>
         <source>Thursday</source>
         <translation>Donnerstag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="296"/>
+        <location filename="../progressmodel.cpp" line="300"/>
         <source>Friday</source>
         <translation>Freitag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="296"/>
+        <location filename="../progressmodel.cpp" line="300"/>
         <source>Saturday</source>
         <translation>Samstag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="296"/>
+        <location filename="../progressmodel.cpp" line="300"/>
         <source>Sunday</source>
         <translation>Sonntag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="303"/>
+        <location filename="../progressmodel.cpp" line="307"/>
         <source>yyyy/MM/dd</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="318"/>
+        <location filename="../progressmodel.cpp" line="322"/>
         <source>week</source>
         <translation>Woche</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="318"/>
+        <location filename="../progressmodel.cpp" line="322"/>
         <source>of year</source>
         <translation>im Jahr</translation>
     </message>
@@ -244,89 +244,89 @@ long presas: config menu</source>
         <translation>Erzeuge Standard aus Liste</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="178"/>
+        <location filename="../main.qml" line="179"/>
         <source>Select Language</source>
         <translation>Wähle Sprache</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="182"/>
+        <location filename="../main.qml" line="183"/>
         <source>English</source>
         <translation>Englisch</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="187"/>
+        <location filename="../main.qml" line="188"/>
         <source>German</source>
         <translation>Deutsch</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="192"/>
+        <location filename="../main.qml" line="193"/>
         <source>French</source>
         <translation>Französich</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="204"/>
+        <location filename="../main.qml" line="205"/>
         <source>Overview of year</source>
         <translation>Jahersübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="209"/>
+        <location filename="../main.qml" line="210"/>
         <source>Overview of month</source>
         <translation>Monatsübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="214"/>
+        <location filename="../main.qml" line="215"/>
         <source>Overview of week</source>
         <translation>Wochenübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="219"/>
+        <location filename="../main.qml" line="220"/>
         <source>Overview of day</source>
         <translation>Tagesübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="228"/>
+        <location filename="../main.qml" line="229"/>
         <source>always show work items</source>
         <translation>Immer Arbeitspakete anzeigen</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="236"/>
+        <location filename="../main.qml" line="237"/>
         <source>show home work only</source>
         <oldsource>show only home work</oldsource>
         <translation>Zeige nur Heimarbeit</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="246"/>
-        <location filename="../main.qml" line="265"/>
+        <location filename="../main.qml" line="247"/>
+        <location filename="../main.qml" line="266"/>
         <source>copy to clipboard...</source>
         <translation>In Zwischenablage kopieren...</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="269"/>
+        <location filename="../main.qml" line="270"/>
         <source>including recreation time of</source>
         <translation>einschließlich Pausenzeit von</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="274"/>
+        <location filename="../main.qml" line="275"/>
         <source>minutes of rest</source>
         <translation>Minuten Pause</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="280"/>
+        <location filename="../main.qml" line="281"/>
         <source>beginning after</source>
         <translation>nach</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="285"/>
+        <location filename="../main.qml" line="286"/>
         <source>hours</source>
         <translation>Stunden</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="292"/>
+        <location filename="../main.qml" line="293"/>
         <source>Cancel</source>
         <translation>Abbruch</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="296"/>
+        <location filename="../main.qml" line="297"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
