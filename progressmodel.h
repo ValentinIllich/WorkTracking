@@ -140,6 +140,7 @@ private:
   void updateItemsList();
   QString humanReadableMonth(int month);
   QString humanReadableWeekDay(int weekday);
+  QString humanReadableDate(QDateTime date);
 
   quint64 getSummaryWorkInSeconds(ProgressEntry const &entry) const;
   QString getSummaryText(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;

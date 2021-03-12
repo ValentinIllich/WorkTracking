@@ -160,10 +160,18 @@ void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const quint64 &work)
   m_workInSeconds[typeOfWork] += work;
 }
 
+QString getConfigurationsPath(QString const &organization, QString const &application)
+{
+  QString path = QDir::homePath()+"/"+organization+"/"+application+"/";
+  QDir dir(path);
+  if( dir.mkpath(path) )
+    return path;
+  else
+    return "";
+}
+
 ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 {
-  saveData("workingOnProjects", true);
-
   connect(this,SIGNAL(languageChanged()),m_qmlEngine,SLOT(retranslate()));
 
   QSettings settings("VISolutions","project-tracker");
@@ -179,7 +187,9 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
   timer->start(1000);
 
   bool todayListIsEmpty = true;
-  QFile file("workingOnProjects.csv");
+
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","EcosClient")+"workingOnProjects.csv";
+  QFile file(dataFile);
   file.open(QFile::ReadOnly);
   QTextStream s(&file);
   while( !s.atEnd() )
@@ -286,6 +296,12 @@ QString ProgressModel::humanReadableWeekDay(int weekday)
     tr("Monday"),tr("Tuesday"),tr("Wednesday"),tr("Thursday"),tr("Friday"),tr("Saturday"),tr("Sunday")
   };
   return s_days[weekday];
+}
+
+QString ProgressModel::humanReadableDate(QDateTime date)
+{
+  QString format = tr("yyyy/MM/dd");
+  return date.date().toString(format);
 }
 
 QString ProgressModel::title()
@@ -719,7 +735,7 @@ void ProgressModel::updateItemsList()
 
         ProgressItem *entry = new ProgressItem();
         entry->setId(item.getId());
-        entry->setProjectName(humanReadableWeekDay(day));
+        entry->setProjectName(humanReadableWeekDay(day) + " " + humanReadableDate(item.getTimeStamp()));
         //entry->m_description = "";
         //entry->m_isActive = false;
         entry->setTimeStamp(item.getTimeStamp());
@@ -806,13 +822,13 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
 
 void ProgressModel::saveData(const QString &filename, bool createBackup)
 {
-  QString dataFile = filename+".csv";
-  QString dataBackup = filename+"-backup.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","EcosClient")+"/"+filename+".csv";
+  QString dataBackup = getConfigurationsPath("config-valentins-qtsolutions","EcosClient")+"/"+filename+"-backup.csv";
 
   if( createBackup )
   {
     QFileInfo fi(dataBackup);
-    if( !fi.exists() || fi.lastModified().daysTo(QDateTime::currentDateTime())>=1 )
+    if( !fi.exists() || fi.lastModified().daysTo(QDateTime::currentDateTime())>=5 )
     {
       QFile file(dataBackup);
       if( !file.rename(filename+"-"+QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss")+".csv"))
