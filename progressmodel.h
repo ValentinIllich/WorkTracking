@@ -128,7 +128,7 @@ public:
 
   Q_INVOKABLE QString getItemTitle(ProgressItem *);
 
-  Q_INVOKABLE void append(const QString &name, const QString &description, const QDateTime &timeSpent);
+  Q_INVOKABLE void append(const QString &name, const QString &description, const QDateTime &timeSpent, int account);
   Q_INVOKABLE void remove(const int &index);
   Q_INVOKABLE void addSeconds(const int &index,const int &diff);
 
@@ -143,7 +143,7 @@ private:
   QString humanReadableWeekDay(int weekday);
   QString humanReadableDate(QDateTime date);
 
-  quint64 getSummaryWorkInSeconds(ProgressEntry const &entry) const;
+  quint64 getSummaryWorkInSeconds(ProgressEntry const &entry, int account = -1) const;
   QString getSummaryText(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;
 
   void saveData(QString const &filename, bool createBackup = false);

@@ -471,11 +471,11 @@ void ProgressModel::workingTimer()
     if( m_progressEntries[i].getItemActive() )
     {
       m_dataChanged = true;
+      m_progressEntries[i].addWorkInSeconds(m_progressEntries[i].getItemCurrentAccount(),1);
       for( int j=0; j<m_progressItems.size(); j++ )
       {
         if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
         {
-          m_progressEntries[i].addWorkInSeconds(m_progressItems.at(j)->selectedAccount(),1);
           m_progressItems.at(j)->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
         }
       }
@@ -555,14 +555,14 @@ QString ProgressModel::getItemTitle(ProgressItem *item)
   return item->projectName();
 }
 
-void ProgressModel::append(const QString &name, const QString &description, const QDateTime &timeSpent)
+void ProgressModel::append(const QString &name, const QString &description, const QDateTime &timeSpent, int account)
 {
   QDateTime newTimeStamp = m_actualDate;
   newTimeStamp.setTime(timeSpent.time());
 
   ProgressEntry item {m_nextId++,newTimeStamp,name,description,true,0,{0,0}};
 
-  item.setWorkInSeconds(0,timeSpent.time().hour()*3600 + timeSpent.time().minute()*60);
+  item.setWorkInSeconds(account,timeSpent.time().hour()*3600 + timeSpent.time().minute()*60);
   m_progressEntries << item;
 
   updateItemsList();
@@ -789,10 +789,12 @@ void ProgressModel::updateItemsList()
   emit itemListChanged();
 }
 
-quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry) const
+quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry,int account) const
 {
   quint64 value = 0;
-  if( m_showHomeWorkOnly )
+  if( account>=0 )
+    value = entry.getWorkInSeconds(account);
+  else if( m_showHomeWorkOnly )
     value = entry.getWorkInSeconds(0);
   else
     value = entry.getWorkInSeconds(0) + entry.getWorkInSeconds(1);
@@ -806,8 +808,17 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
   QString infotext;
   bool percentEnabled = totalWorkInSeconds[0]>0 || totalWorkInSeconds[1]>0;
 
-  quint64 value = getSummaryWorkInSeconds(entry);
+//  quint64 value = 0;
+//  value = getSummaryWorkInSeconds(entry,0);
+//  /*int homeseconds = value % 60;*/ value /= 60;
+//  int homeminutes = value % 60; value /= 60;
+//  int homehours = value;
+//  value = getSummaryWorkInSeconds(entry,1);
+//  /*int officeseconds = value % 60;*/ value /= 60;
+//  int officeminutes = value % 60; value /= 60;
+//  int officehours = value;
 
+  quint64 value = getSummaryWorkInSeconds(entry);
   if( percentEnabled )
     percent = (double)value*100.0/(double)(totalWorkInSeconds[0]+totalWorkInSeconds[1]); // \todo selection of menu?
   bool showinPercent = m_showSummariesInPercent && (percentEnabled);
@@ -829,6 +840,8 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
   case DisplayRecordDay:
     if( entry.getItemActive() )
       infotext = QString::asprintf("%02d:%02d:%02d",hours,minutes,seconds);
+//    else if( m_showHomeWorkOnly )
+//      infotext = QString::asprintf("%02d:%02d/%02d:%02d",homehours,homeminutes,officehours,officeminutes);
     else
       infotext = QString::asprintf("%02d:%02d",hours,minutes);
     break;
