@@ -101,7 +101,7 @@
     <message>
         <location filename="../progressmodel.cpp" line="307"/>
         <source>yyyy/MM/dd</source>
-        <translation type="unfinished"></translation>
+        <translation>dd.MM.yyyy</translation>
     </message>
     <message>
         <location filename="../progressmodel.cpp" line="322"/>
@@ -123,7 +123,7 @@
     <message>
         <location filename="../WorkDelegate.qml" line="108"/>
         <source>click to open</source>
-        <translation type="unfinished"></translation>
+        <translation>cliquer pour ouvrir</translation>
     </message>
     <message>
         <location filename="../WorkDelegate.qml" line="149"/>
@@ -169,31 +169,34 @@
         <translation>Ajouter module de travail</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="88"/>
+        <location filename="../WorkDialog.qml" line="90"/>
+        <source>working at home</source>
+        <translation>travailler à la maison</translation>
+    </message>
+    <message>
+        <location filename="../WorkDialog.qml" line="90"/>
+        <source>working in office</source>
+        <translation>travailler au bureau</translation>
+    </message>
+    <message>
+        <location filename="../WorkDialog.qml" line="98"/>
         <source>title</source>
         <translation>titre</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="101"/>
+        <location filename="../WorkDialog.qml" line="111"/>
         <source>time spent</source>
         <translation>temps utilisé</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="121"/>
+        <location filename="../WorkDialog.qml" line="131"/>
         <source>Cancel</source>
         <translation>Avorter</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="128"/>
+        <location filename="../WorkDialog.qml" line="138"/>
         <source>OK</source>
         <translation></translation>
-    </message>
-</context>
-<context>
-    <name>WorkingFileDialog</name>
-    <message>
-        <source>Cancel</source>
-        <translation type="obsolete">Avorter</translation>
     </message>
 </context>
 <context>
@@ -206,29 +209,31 @@
     <message>
         <location filename="../main.qml" line="104"/>
         <source>select previous time period</source>
-        <translation type="unfinished"></translation>
+        <translation>sélectionner l’élément précédent</translation>
     </message>
     <message>
         <location filename="../main.qml" line="118"/>
         <source>select next time period</source>
-        <translation type="unfinished"></translation>
+        <translation>sélectionner l’élément suivant</translation>
     </message>
     <message>
         <location filename="../main.qml" line="133"/>
         <source>short press: display menu
 long presas: config menu</source>
-        <translation type="unfinished"></translation>
+        <translation>presse courte: menu d’affichage
+barrage long: config menu</translation>
     </message>
     <message>
         <location filename="../main.qml" line="147"/>
         <source>add a new work item</source>
-        <translation type="unfinished"></translation>
+        <translation>ajouter une nouvelle entrée</translation>
     </message>
     <message>
         <location filename="../main.qml" line="161"/>
         <source>switch between hours and percent
 (but not in day view)</source>
-        <translation type="unfinished"></translation>
+        <translation>commuter entre les heures et le pourcentage
+(mais pas en vue de jour)</translation>
     </message>
     <message>
         <location filename="../main.qml" line="170"/>
@@ -320,13 +325,6 @@ long presas: config menu</source>
         <location filename="../main.qml" line="297"/>
         <source>OK</source>
         <translation></translation>
-    </message>
-</context>
-<context>
-    <name>workingFileDialog</name>
-    <message>
-        <source>Cancel</source>
-        <translation type="obsolete">Avorter</translation>
     </message>
 </context>
 </TS>

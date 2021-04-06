@@ -2,13 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
 <context>
-    <name>HelpDialog</name>
-    <message>
-        <source>OK</source>
-        <translation type="obsolete">OK</translation>
-    </message>
-</context>
-<context>
     <name>ProgressModel</name>
     <message>
         <location filename="../progressmodel.cpp" line="292"/>
@@ -108,7 +101,7 @@
     <message>
         <location filename="../progressmodel.cpp" line="307"/>
         <source>yyyy/MM/dd</source>
-        <translation type="unfinished"></translation>
+        <translation>dd.MM.yyyy</translation>
     </message>
     <message>
         <location filename="../progressmodel.cpp" line="322"/>
@@ -130,7 +123,7 @@
     <message>
         <location filename="../WorkDelegate.qml" line="108"/>
         <source>click to open</source>
-        <translation type="unfinished"></translation>
+        <translation>klicken zum Öffnen</translation>
     </message>
     <message>
         <location filename="../WorkDelegate.qml" line="149"/>
@@ -176,31 +169,34 @@
         <translation>Neues Arbeitspaket</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="88"/>
+        <location filename="../WorkDialog.qml" line="90"/>
+        <source>working at home</source>
+        <translation>arbeite zuhause</translation>
+    </message>
+    <message>
+        <location filename="../WorkDialog.qml" line="90"/>
+        <source>working in office</source>
+        <translation>arbeite im Büro</translation>
+    </message>
+    <message>
+        <location filename="../WorkDialog.qml" line="98"/>
         <source>title</source>
         <translation>Titel</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="101"/>
+        <location filename="../WorkDialog.qml" line="111"/>
         <source>time spent</source>
         <translation>Bereits verbraucht</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="121"/>
+        <location filename="../WorkDialog.qml" line="131"/>
         <source>Cancel</source>
         <translation>Abbruch</translation>
     </message>
     <message>
-        <location filename="../WorkDialog.qml" line="128"/>
+        <location filename="../WorkDialog.qml" line="138"/>
         <source>OK</source>
         <translation>OK</translation>
-    </message>
-</context>
-<context>
-    <name>WorkingFileDialog</name>
-    <message>
-        <source>Cancel</source>
-        <translation type="obsolete">Abbruch</translation>
     </message>
 </context>
 <context>
@@ -213,29 +209,31 @@
     <message>
         <location filename="../main.qml" line="104"/>
         <source>select previous time period</source>
-        <translation type="unfinished"></translation>
+        <translation>Schritt zurück</translation>
     </message>
     <message>
         <location filename="../main.qml" line="118"/>
         <source>select next time period</source>
-        <translation type="unfinished"></translation>
+        <translation>Schritt vorwärts</translation>
     </message>
     <message>
         <location filename="../main.qml" line="133"/>
         <source>short press: display menu
 long presas: config menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Klick: Zeige Anzeigemenü
+Drücken: Zeige Konfigurationsmenü</translation>
     </message>
     <message>
         <location filename="../main.qml" line="147"/>
         <source>add a new work item</source>
-        <translation type="unfinished"></translation>
+        <translation>Erzeuge neuen Eintrag</translation>
     </message>
     <message>
         <location filename="../main.qml" line="161"/>
         <source>switch between hours and percent
 (but not in day view)</source>
-        <translation type="unfinished"></translation>
+        <translation>Wechsel zwischen Stunden und Prozent
+(nicht in Tagesansicht)</translation>
     </message>
     <message>
         <location filename="../main.qml" line="170"/>
@@ -329,13 +327,6 @@ long presas: config menu</source>
         <location filename="../main.qml" line="297"/>
         <source>OK</source>
         <translation>OK</translation>
-    </message>
-</context>
-<context>
-    <name>workingFileDialog</name>
-    <message>
-        <source>Cancel</source>
-        <translation type="obsolete">Abbruch</translation>
     </message>
 </context>
 </TS>
