@@ -75,11 +75,21 @@ Dialog {
     onAccepted: {
         var newDate = new Date(Date.now())
         newDate.setHours(hoursTumbler.currentIndex,minutesTumbler.currentIndex,0)
-        workDataModel.append(projectTitle.text,"",newDate)
+        workDataModel.append(projectTitle.text,"",newDate,newWorkType.currentIndex)
     }
     onRejected: workDialog.close()
 
     contentItem: ColumnLayout {
+
+        ComboBox {
+            id: newWorkType
+            Layout.fillWidth: true
+            visible: root.checked && projectData.isChangeable
+            Component.onCompleted: currentIndex = 0
+            model: {
+                [ qsTr("working at home"), qsTr("working in office") ]
+            }
+        }
         RowLayout {
             id: description
 
