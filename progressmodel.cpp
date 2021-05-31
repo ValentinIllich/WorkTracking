@@ -160,6 +160,7 @@ void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const quint64 &work)
 {
   while (m_workInSeconds.size()<typeOfWork) m_workInSeconds.push_back(0);
   m_workInSeconds[typeOfWork] += work;
+  if( m_workInSeconds[typeOfWork]>(24*3600) ) m_workInSeconds[typeOfWork] = 0;
 }
 
 QString getConfigurationsPath(QString const &organization, QString const &application)
@@ -555,14 +556,13 @@ QString ProgressModel::getItemTitle(ProgressItem *item)
   return item->projectName();
 }
 
-void ProgressModel::append(const QString &name, const QString &description, const QDateTime &timeSpent, int account)
+void ProgressModel::append(const QString &name, const QString &description, const int &spentSeconds, int account)
 {
   QDateTime newTimeStamp = m_actualDate;
-  newTimeStamp.setTime(timeSpent.time());
 
   ProgressEntry item {m_nextId++,newTimeStamp,name,description,true,0,{0,0}};
 
-  item.setWorkInSeconds(account,timeSpent.time().hour()*3600 + timeSpent.time().minute()*60);
+  item.setWorkInSeconds(account,spentSeconds);
   m_progressEntries << item;
 
   updateItemsList();
@@ -628,6 +628,22 @@ void ProgressModel::createDefaultList()
   {
     s << "title=" << entry->projectName() << ";descr=" << entry->description() << endl;
   }
+}
+
+bool ProgressModel::getAccountSelected(const int &account)
+{
+  if( account==0 )
+    return true;
+  else if( account==1 )
+    return !m_showHomeWorkOnly;
+  else
+    return false;
+}
+
+void ProgressModel::setAccountSelected(const int &account, const bool &enabled)
+{
+  if( account==1 )
+    m_showHomeWorkOnly = !enabled;
 }
 
 void ProgressModel::setQmlEngine(QQmlApplicationEngine &engine)
@@ -697,7 +713,7 @@ void ProgressModel::updateItemsList()
       break;
     }
     m_totalWorkSeconds[0] += item.getWorkInSeconds(0);
-    m_totalWorkSeconds[1] += item.getWorkInSeconds(1);
+    if( !m_showHomeWorkOnly ) m_totalWorkSeconds[1] += item.getWorkInSeconds(1);
   }
 
   if( projectsMap.size()>0 )
@@ -706,6 +722,7 @@ void ProgressModel::updateItemsList()
     for( const auto &key : qAsConst(keys) )
     {
       ProgressEntry &item = projectsMap[key];
+
       ProgressItem *entry = new ProgressItem();
       entry->setId(item.getId());
       entry->setProjectName(key);// item.m_projectName;

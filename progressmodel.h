@@ -128,12 +128,15 @@ public:
 
   Q_INVOKABLE QString getItemTitle(ProgressItem *);
 
-  Q_INVOKABLE void append(const QString &name, const QString &description, const QDateTime &timeSpent, int account);
+  Q_INVOKABLE void append(const QString &name, const QString &description, const int &spentSeconds, int account);
   Q_INVOKABLE void remove(const int &index);
   Q_INVOKABLE void addSeconds(const int &index,const int &diff);
 
   Q_INVOKABLE void setLanguage(const int &);
   Q_INVOKABLE void createDefaultList();
+
+  Q_INVOKABLE bool getAccountSelected(const int &);
+  Q_INVOKABLE void setAccountSelected(const int &, const bool &);
 
   static void setQmlEngine(QQmlApplicationEngine &engine);
 
