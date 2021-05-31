@@ -73,9 +73,7 @@ Dialog {
         minutesTumbler.currentIndex = 0
     }
     onAccepted: {
-        var newDate = new Date(Date.now())
-        newDate.setHours(hoursTumbler.currentIndex,minutesTumbler.currentIndex,0)
-        workDataModel.append(projectTitle.text,"",newDate,newWorkType.currentIndex)
+        workDataModel.append(projectTitle.text,"",hoursTumbler.currentIndex*3600+minutesTumbler.currentIndex*60,newWorkType.currentIndex)
     }
     onRejected: workDialog.close()
 
