@@ -195,11 +195,19 @@ ApplicationWindow {
         }
     }
 
+    function changeVisibleAccounts() {
+        projectData.showHomeWorkOnly = !officework.checked
+        displaymenu.close()
+    }
+
     Menu {
         id: displaymenu
         width: windowWidth
         y: modeButton.y-implicitHeight
         onOpened: showwork.checked = projectData.alwaysShowWork
+//        MenuSeparator {
+//            width: windowWidth // needed for language changes (win10)
+//        }
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of year")
@@ -223,6 +231,60 @@ ApplicationWindow {
         MenuSeparator {
             width: windowWidth // needed for language changes (win10)
         }
+//        ComboBox {
+//            width: windowWidth // needed for language changes
+//            onActivated: accountChanged(currentIndex)
+//            Component.onCompleted: currentIndex = 0
+//            model: {
+//                [ qsTr("working at home"), qsTr("working in office") ]
+//            }
+//        }
+        MenuItem {
+            width: windowWidth // needed for language changes
+            enabled: false
+            text: qsTr("Overview showing following accounts")
+        }
+        RowLayout
+        {
+            RoundButton {
+                text: "Home"
+                checked: projectData.getAccountSelected(0)
+                checkable: true
+                Material.background: checked ? Material.accent : "transparent"
+                onToggled: projectData.setAccountSelected(0,checked)
+            }
+            RoundButton {
+                text: "Office"
+                id: officework
+                checked: projectData.getAccountSelected(1)
+                checkable: true
+                Material.background: checked ? Material.accent : "transparent"
+                onToggled: projectData.setAccountSelected(1,checked)
+            }
+//            RoundButton {
+//                text: "Travel"
+//                enabled: false
+//                Component.onCompleted: checked = projectData.getAccountSelected(2)
+//                checkable: true
+//                Material.background: checked ? Material.accent : "transparent"
+//                onToggled: projectData.setAccountSelected(2,checked)
+//            }
+//            RoundButton {
+//                text: "Private"
+//                enabled: false
+//                Component.onCompleted: checked = projectData.getAccountSelected(3)
+//                checkable: true
+//                Material.background: checked ? Material.accent : "transparent"
+//                onToggled: projectData.setAccountSelected(3,checked)
+//            }
+            RoundButton {
+                text: "OK"
+                onClicked: changeVisibleAccounts()
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+        }
         MenuItem {
             id: showwork
             width: windowWidth // needed for language changes (win10)
@@ -231,14 +293,15 @@ ApplicationWindow {
             checked: projectData.alwaysShowWork
             onTriggered: projectData.alwaysShowWork = checked
         }
-        MenuItem {
-            id: homeWork
-            width: windowWidth // needed for language changes (win10)
-            text: qsTr("show home work only")
-            checkable: true
-            checked: projectData.showHomeWorkOnly
-            onTriggered: projectData.showHomeWorkOnly = checked
-        }
+
+//        MenuItem {
+//            id: homeWork
+//            width: windowWidth // needed for language changes (win10)
+//            text: qsTr("show home work only")
+//            checkable: true
+//            checked: projectData.showHomeWorkOnly
+//            onTriggered: projectData.showHomeWorkOnly = checked
+//        }
         MenuSeparator {
             width: windowWidth // needed for language changes (win10)
         }
