@@ -117,10 +117,6 @@
 <context>
     <name>WorkDelegate</name>
     <message>
-        <source>work is done at home</source>
-        <translation type="vanished">Arbeit von zuhause</translation>
-    </message>
-    <message>
         <location filename="../WorkDelegate.qml" line="102"/>
         <source>click to open</source>
         <translation>klicken zum Öffnen</translation>
@@ -283,18 +279,23 @@ Drücken: Zeige Konfigurationsmenü</translation>
     </message>
     <message>
         <location filename="../main.qml" line="241"/>
-        <source>Overview accounts</source>
-        <translation>Overview using following accounts</translation>
+        <source>Overview using accounts</source>
+        <translation>Übersicht zeigt folgende Konten</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="246"/>
+        <source>Home</source>
+        <translation>Zuhause</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="253"/>
+        <source>Office</source>
+        <translation>Büro</translation>
     </message>
     <message>
         <location filename="../main.qml" line="279"/>
         <source>always show work items</source>
         <translation>Immer Arbeitspakete anzeigen</translation>
-    </message>
-    <message>
-        <source>show home work only</source>
-        <oldsource>show only home work</oldsource>
-        <translation type="vanished">Zeige nur Heimarbeit</translation>
     </message>
     <message>
         <location filename="../main.qml" line="289"/>

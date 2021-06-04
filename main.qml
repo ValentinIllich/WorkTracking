@@ -238,19 +238,19 @@ ApplicationWindow {
         MenuItem {
             width: windowWidth // needed for language changes
             enabled: false
-            text: qsTr("Overview accounts")
+            text: qsTr("Overview using accounts")
         }
         RowLayout
         {
             RoundButton {
-                text: "Home"
+                text: qsTr("Home")
                 checked: projectData.getAccountSelected(0)
                 checkable: true
                 Material.background: checked ? Material.accent : "transparent"
                 onToggled: projectData.setAccountSelected(0,checked)
             }
             RoundButton {
-                text: "Office"
+                text: qsTr("Office")
                 id: officework
                 checked: projectData.getAccountSelected(1)
                 checkable: true

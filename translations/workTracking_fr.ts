@@ -117,10 +117,6 @@
 <context>
     <name>WorkDelegate</name>
     <message>
-        <source>work is done at home</source>
-        <translation type="vanished">travail fait à la maison</translation>
-    </message>
-    <message>
         <location filename="../WorkDelegate.qml" line="102"/>
         <source>click to open</source>
         <translation>cliquer pour ouvrir</translation>
@@ -282,17 +278,23 @@ barrage long: config menu</translation>
     </message>
     <message>
         <location filename="../main.qml" line="241"/>
-        <source>Overview accounts</source>
+        <source>Overview using accounts</source>
         <translation>Aperçu utilisé les comptes suivants</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="246"/>
+        <source>Home</source>
+        <translation>Maison</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="253"/>
+        <source>Office</source>
+        <translation>Bureau</translation>
     </message>
     <message>
         <location filename="../main.qml" line="279"/>
         <source>always show work items</source>
         <translation>Toujours afficher les lots de travaux</translation>
-    </message>
-    <message>
-        <source>show home work only</source>
-        <translation type="vanished">Afficher uniquement le travail à domicile</translation>
     </message>
     <message>
         <location filename="../main.qml" line="289"/>
