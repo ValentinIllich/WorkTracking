@@ -58,7 +58,6 @@ class ProgressModel : public QObject
   Q_PROPERTY(QString title READ title NOTIFY titleChanged)
   Q_PROPERTY(bool isChangeable READ isChangeable NOTIFY isChangeableChanged)
   Q_PROPERTY(bool alwaysShowWork READ alwaysShowWork WRITE setAlwaysShowWork NOTIFY alwaysShowWorkChanged)
-  Q_PROPERTY(bool showHomeWorkOnly READ showHomeWorkOnly WRITE setShowHomeWorkOnly NOTIFY showHomeWorkOnlyChanged)
   Q_PROPERTY(QQmlListProperty<ProgressItem> itemList READ itemList NOTIFY itemListChanged)
 
   Q_PROPERTY(bool showSumInPercent READ showSumInPercent NOTIFY showSumInPercentChanged)
@@ -89,9 +88,6 @@ public:
   bool alwaysShowWork() const;
   void setAlwaysShowWork(const bool &);
 
-  bool showHomeWorkOnly() const;
-  void setShowHomeWorkOnly(const bool &);
-
   QQmlListProperty<ProgressItem> itemList();
 
   bool showSumInPercent() const;
@@ -103,7 +99,6 @@ public:
   Q_SLOT void itemNameChanged();
   Q_SLOT void itemDescriptionChanged();
   Q_SLOT void itemAccountChanged();
-  //Q_SLOT void itemWorkInSecondsChanged();
   Q_SLOT void workingTimer();
 
   Q_SIGNAL void actualDateChanged();
@@ -112,7 +107,6 @@ public:
   Q_SIGNAL void titleChanged();
   Q_SIGNAL void isChangeableChanged();
   Q_SIGNAL void alwaysShowWorkChanged();
-  Q_SIGNAL void showHomeWorkOnlyChanged();
   Q_SIGNAL void itemListChanged();
   Q_SIGNAL void showSumInPercentChanged();
   Q_SIGNAL void totalTimeChanged();
@@ -141,6 +135,10 @@ public:
   static void setQmlEngine(QQmlApplicationEngine &engine);
 
 private:
+  const int eAccountNone       = 0x0000;
+  const int eAccountHomework   = 0x0001;
+  const int eAccountOfficeWork = 0x0002;
+
   void updateItemsList();
   QString humanReadableMonth(int month);
   QString humanReadableWeekDay(int weekday);
@@ -160,7 +158,7 @@ private:
   OperatingMode m_operatingMode       = DisplayRecordDay;
   bool m_isChangeable                 = true;
   bool m_alwaysShowWork               = false;
-  bool m_showHomeWorkOnly             = false;
+  int m_selectedAccounts              = eAccountHomework | eAccountOfficeWork;
 
   QVector<quint64> m_totalWorkSeconds = { 0,0 };
   bool m_showSummariesInPercent       = false;
@@ -182,7 +180,6 @@ class ProgressItem : public QObject
 
 public:
   explicit ProgressItem();
-  //explicit ProgressItem(const ProgressItem &);
   virtual ~ProgressItem();
 
   int getId() const;

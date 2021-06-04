@@ -182,8 +182,6 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
     changeLanguage(settings.value("language-id").toInt());
 
   m_actualDate = QDateTime::currentDateTime();
-  //m_operatingMode = DisplayRecordDay;
-  //m_isChangeable = true;
 
   QTimer *timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(workingTimer()));
@@ -251,7 +249,6 @@ void ProgressModel::setMode(const ProgressModel::OperatingMode &mode)
 
 void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QString &thresholdHours)
 {
-  // this will ensure that m_totalWorkSeconds is correct
   updateItemsList();
 
 
@@ -345,19 +342,6 @@ void ProgressModel::setAlwaysShowWork(const bool &alwaysWork)
   m_alwaysShowWork = alwaysWork;
   updateItemsList();
   emit alwaysShowWorkChanged();
-}
-
-bool ProgressModel::showHomeWorkOnly() const
-{
-  return m_showHomeWorkOnly;
-}
-
-void ProgressModel::setShowHomeWorkOnly(const bool &homeWorkOnly)
-{
-  m_showHomeWorkOnly = homeWorkOnly;
-  updateItemsList();
-  emit showHomeWorkOnlyChanged();
-  emit totalTimeChanged();
 }
 
 QQmlListProperty<ProgressItem> ProgressModel::itemList()
@@ -632,18 +616,22 @@ void ProgressModel::createDefaultList()
 
 bool ProgressModel::getAccountSelected(const int &account)
 {
-  if( account==0 )
-    return true;
-  else if( account==1 )
-    return !m_showHomeWorkOnly;
-  else
-    return false;
+  static int accounts[] = { eAccountHomework, eAccountOfficeWork };
+
+  return (m_selectedAccounts & accounts[account])!=0;
 }
 
 void ProgressModel::setAccountSelected(const int &account, const bool &enabled)
 {
-  if( account==1 )
-    m_showHomeWorkOnly = !enabled;
+  static int accounts[] = { eAccountHomework, eAccountOfficeWork };
+
+  if( enabled )
+    m_selectedAccounts |= accounts[account];
+  else
+    m_selectedAccounts &= ~accounts[account];
+
+  updateItemsList();
+  emit totalTimeChanged();
 }
 
 void ProgressModel::setQmlEngine(QQmlApplicationEngine &engine)
@@ -712,8 +700,9 @@ void ProgressModel::updateItemsList()
       dayList << ProgressEntry(item.getId(),item.getTimeStamp(), item.getItemName(),item.getItemDescription(),item.getItemActive(),item.getItemCurrentAccount(),item.getAllWorkInSeconds());
       break;
     }
-    m_totalWorkSeconds[0] += item.getWorkInSeconds(0);
-    if( !m_showHomeWorkOnly ) m_totalWorkSeconds[1] += item.getWorkInSeconds(1);
+
+    if( (m_selectedAccounts & eAccountHomework)!=0 )    m_totalWorkSeconds[0] += item.getWorkInSeconds(0);
+    if( (m_selectedAccounts & eAccountOfficeWork)!=0 )  m_totalWorkSeconds[1] += item.getWorkInSeconds(1);
   }
 
   if( projectsMap.size()>0 )
@@ -725,14 +714,10 @@ void ProgressModel::updateItemsList()
 
       ProgressItem *entry = new ProgressItem();
       entry->setId(item.getId());
-      entry->setProjectName(key);// item.m_projectName;
-      //entry->m_description = item.m_description;
-      //entry->m_isActive = item.m_active;
-      //entry->m_timeStamp = item.m_timeStamp;
+      entry->setProjectName(key);
       entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
       entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
-      //entry->connect(entry,SIGNAL(isActiveChanged()),this,SLOT(itemStateChanged()));
       entry->connect(entry,SIGNAL(projectNameChanged()),this,SLOT(itemNameChanged()));
       entry->connect(entry,SIGNAL(descriptionChanged()),this,SLOT(itemDescriptionChanged()));
       m_progressItems << entry;
@@ -749,8 +734,6 @@ void ProgressModel::updateItemsList()
         ProgressItem *entry = new ProgressItem();
         entry->setId(item.getId());
         entry->setProjectName(humanReadableMonth(month));
-        //entry->m_description = "";
-        //entry->m_isActive = false;
         entry->setTimeStamp(item.getTimeStamp());
         entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
@@ -770,8 +753,6 @@ void ProgressModel::updateItemsList()
         ProgressItem *entry = new ProgressItem();
         entry->setId(item.getId());
         entry->setProjectName(humanReadableWeekDay(day) + " " + humanReadableDate(item.getTimeStamp()));
-        //entry->m_description = "";
-        //entry->m_isActive = false;
         entry->setTimeStamp(item.getTimeStamp());
         entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
@@ -811,10 +792,11 @@ quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry,int ac
   quint64 value = 0;
   if( account>=0 )
     value = entry.getWorkInSeconds(account);
-  else if( m_showHomeWorkOnly )
-    value = entry.getWorkInSeconds(0);
   else
-    value = entry.getWorkInSeconds(0) + entry.getWorkInSeconds(1);
+  {
+    if( (m_selectedAccounts & eAccountHomework)!=0 ) value += entry.getWorkInSeconds(0);
+    if( (m_selectedAccounts & eAccountOfficeWork)!=0 ) value += entry.getWorkInSeconds(1);
+  }
 
   return value;
 }
@@ -824,16 +806,6 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
   double percent = 0.0;
   QString infotext;
   bool percentEnabled = totalWorkInSeconds[0]>0 || totalWorkInSeconds[1]>0;
-
-//  quint64 value = 0;
-//  value = getSummaryWorkInSeconds(entry,0);
-//  /*int homeseconds = value % 60;*/ value /= 60;
-//  int homeminutes = value % 60; value /= 60;
-//  int homehours = value;
-//  value = getSummaryWorkInSeconds(entry,1);
-//  /*int officeseconds = value % 60;*/ value /= 60;
-//  int officeminutes = value % 60; value /= 60;
-//  int officehours = value;
 
   quint64 value = getSummaryWorkInSeconds(entry);
   if( percentEnabled )
@@ -857,8 +829,6 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
   case DisplayRecordDay:
     if( entry.getItemActive() )
       infotext = QString::asprintf("%02d:%02d:%02d",hours,minutes,seconds);
-//    else if( m_showHomeWorkOnly )
-//      infotext = QString::asprintf("%02d:%02d/%02d:%02d",homehours,homeminutes,officehours,officeminutes);
     else
       infotext = QString::asprintf("%02d:%02d",hours,minutes);
     break;

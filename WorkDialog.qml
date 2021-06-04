@@ -59,7 +59,6 @@ Dialog {
     id: workDialog
     title: qsTr("Add new Work")
     modal: true
-    //standardButtons: DialogButtonBox.OK | DialogButtonBox.Cancel
 
     property ProgressModel workDataModel
 

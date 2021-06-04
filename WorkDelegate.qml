@@ -71,17 +71,11 @@ ItemDelegate {
         switch(projectData.mode)
         {
         case OperatingMode.DisplayYear:
-//            if (projectData.alwaysShowWork)
                 return projectName
-//            else
-//                return alarmDate.toLocaleDateString(window.locale, "MMMM")
         case OperatingMode.DisplayMonth:
             return projectName
         case OperatingMode.DisplayWeek:
-//            if (projectData.alwaysShowWork)
                 return projectName
-//            else
-//                return alarmDate.toLocaleDateString(window.locale, "dddd")
         case OperatingMode.DisplayRecordDay:
             return summary + " " + projectName
         }
