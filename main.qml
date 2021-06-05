@@ -207,34 +207,26 @@ ApplicationWindow {
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of year")
-            onTriggered: projectData.setMode(OperatingMode.DisplayYear)
+            onTriggered: projectData.mode = OperatingMode.DisplayYear
         }
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of month")
-            onTriggered: projectData.setMode(OperatingMode.DisplayMonth)
+            onTriggered: projectData.mode = OperatingMode.DisplayMonth
         }
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of week")
-            onTriggered: projectData.setMode(OperatingMode.DisplayWeek)
+            onTriggered: projectData.mode = OperatingMode.DisplayWeek
         }
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of day")
-            onTriggered: projectData.setMode(OperatingMode.DisplayRecordDay)
+            onTriggered: projectData.mode = OperatingMode.DisplayRecordDay
         }
         MenuSeparator {
             width: windowWidth // needed for language changes (win10)
         }
-//        ComboBox {
-//            width: windowWidth // needed for language changes
-//            onActivated: accountChanged(currentIndex)
-//            Component.onCompleted: currentIndex = 0
-//            model: {
-//                [ qsTr("working at home"), qsTr("working in office") ]
-//            }
-//        }
         MenuItem {
             width: windowWidth // needed for language changes
             enabled: false
@@ -280,6 +272,15 @@ ApplicationWindow {
             checkable: true
             checked: projectData.alwaysShowWork
             onTriggered: projectData.alwaysShowWork = checked
+        }
+        ComboBox {
+            width: windowWidth // needed for language changes
+            enabled: projectData.mode==OperatingMode.DisplayRecordDay
+            onActivated: projectData.currentRecordingAccount = currentIndex
+            Component.onCompleted: currentIndex = 0
+            model: {
+                [ qsTr("Recording at home"), qsTr("Recording in office") ]
+            }
         }
         MenuSeparator {
             width: windowWidth // needed for language changes (win10)

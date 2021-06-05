@@ -245,6 +245,18 @@ void ProgressModel::setMode(const ProgressModel::OperatingMode &mode)
   updateItemsList();
   emit titleChanged();
   emit totalTimeChanged();
+  emit modeChanged();
+}
+
+int ProgressModel::currentRecordingAccount()
+{
+  return m_currentRecordingAccount;
+}
+
+void ProgressModel::setCurrentRecordingAccount(const int &account)
+{
+  m_currentRecordingAccount = account;
+  emit currentRecordingAccountChanged();
 }
 
 void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QString &thresholdHours)
@@ -456,7 +468,7 @@ void ProgressModel::workingTimer()
     if( m_progressEntries[i].getItemActive() )
     {
       m_dataChanged = true;
-      m_progressEntries[i].addWorkInSeconds(m_progressEntries[i].getItemCurrentAccount(),1);
+      m_progressEntries[i].addWorkInSeconds(m_currentRecordingAccount,1);
       for( int j=0; j<m_progressItems.size(); j++ )
       {
         if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )

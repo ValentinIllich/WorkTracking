@@ -66,7 +66,7 @@ ItemDelegate {
         return label[number]
     }
 
-    function itemTitle(alarmDate,projectName,summary)
+    function itemTitle(projectName,summary)
     {
         switch(projectData.mode)
         {
@@ -80,6 +80,17 @@ ItemDelegate {
             return summary + " " + projectName
         }
 
+    }
+
+    function itemDescription(isActive,description)
+    {
+        if( isActive )
+        {
+            var prefix = [ qsTr("(currently at home)"),qsTr("(currently in office)") ]
+            return prefix[projectData.currentRecordingAccount] + " " + description
+        }
+        else
+            return description
     }
 
     function currentAccount()
@@ -108,13 +119,13 @@ ItemDelegate {
                 Label {
                     id: timeLabel
                     font.pixelSize: Qt.application.font.pixelSize * 2
-                    text: itemTitle(model.timeStamp,model.projectName,model.summary)
+                    text: itemTitle(model.projectName,model.summary)
                     color: model.isActive ? "lightgreen" : "white"
                 }
                 Label {
                     id: projectAbout
-                    text: model.description
-                    visible: model.description.length
+                    text: itemDescription(model.isActive,model.description)
+                    visible: itemDescription(model.isActive,model.description).length
                 }
             }
             Item {
@@ -140,7 +151,7 @@ ItemDelegate {
             onActivated: accountChanged(currentIndex)
             Component.onCompleted: currentIndex = currentAccount()
             model: {
-                [ qsTr("working at home"), qsTr("working in office") ]
+                [ qsTr("time correction for home"), qsTr("time correction for office") ]
             }
         }
 

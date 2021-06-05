@@ -53,7 +53,8 @@ class ProgressModel : public QObject
   Q_OBJECT
 
   Q_PROPERTY(QDateTime actualDate READ actualDate WRITE setActualDate NOTIFY actualDateChanged)
-  Q_PROPERTY(OperatingMode mode READ mode NOTIFY modeChanged)
+  Q_PROPERTY(OperatingMode mode READ mode WRITE setMode NOTIFY modeChanged)
+  Q_PROPERTY(int currentRecordingAccount READ currentRecordingAccount WRITE setCurrentRecordingAccount NOTIFY currentRecordingAccountChanged)
 
   Q_PROPERTY(QString title READ title NOTIFY titleChanged)
   Q_PROPERTY(bool isChangeable READ isChangeable NOTIFY isChangeableChanged)
@@ -80,6 +81,10 @@ public:
   void setActualDate(const QDateTime &);
 
   OperatingMode mode();
+  void setMode(const OperatingMode &);
+
+  int currentRecordingAccount();
+  void setCurrentRecordingAccount(const int &);
 
   QString title();
 
@@ -103,6 +108,7 @@ public:
 
   Q_SIGNAL void actualDateChanged();
   Q_SIGNAL void modeChanged();
+  Q_SIGNAL void currentRecordingAccountChanged();
 
   Q_SIGNAL void titleChanged();
   Q_SIGNAL void isChangeableChanged();
@@ -116,7 +122,6 @@ public:
   Q_INVOKABLE void previous();
   Q_INVOKABLE void next();
 
-  Q_INVOKABLE void setMode(const OperatingMode &);
   Q_INVOKABLE void exportToClipboard(const QString &,const QString &);
   Q_INVOKABLE void changeSummary();
 
@@ -159,6 +164,7 @@ private:
   bool m_isChangeable                 = true;
   bool m_alwaysShowWork               = false;
   int m_selectedAccounts              = eAccountHomework | eAccountOfficeWork;
+  int m_currentRecordingAccount       = 0;
 
   QVector<quint64> m_totalWorkSeconds = { 0,0 };
   bool m_showSummariesInPercent       = false;

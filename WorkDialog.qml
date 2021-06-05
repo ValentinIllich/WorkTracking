@@ -81,7 +81,6 @@ Dialog {
         ComboBox {
             id: newWorkType
             Layout.fillWidth: true
-            visible: root.checked && projectData.isChangeable
             Component.onCompleted: currentIndex = 0
             model: {
                 [ qsTr("working at home"), qsTr("working in office") ]
