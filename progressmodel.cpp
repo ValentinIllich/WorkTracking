@@ -189,7 +189,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   bool todayListIsEmpty = true;
 
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"workingOnProjects.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"workingOnProjects.csv";
   QFile file(dataFile);
   file.open(QFile::ReadOnly);
   QTextStream s(&file);
@@ -204,7 +204,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   if( todayListIsEmpty )
   {
-    QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"defaultItems.csv";
+    QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"defaultItems.csv";
     QFile file(dataFile);
     file.open(QFile::ReadOnly);
     QTextStream s(&file);
@@ -615,7 +615,7 @@ void ProgressModel::setLanguage(const int &lang)
 
 void ProgressModel::createDefaultList()
 {
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"/defaultItems.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/defaultItems.csv";
 
   QFile file(dataFile);
   file.open(QFile::WriteOnly);
@@ -851,8 +851,8 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
 
 void ProgressModel::saveData(const QString &filename, bool createBackup)
 {
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"/"+filename+".csv";
-  QString dataBackup = getConfigurationsPath("config-valentins-qtsolutions","workTracker")+"/"+filename+"-backup.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+filename+".csv";
+  QString dataBackup = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+filename+"-backup.csv";
 
   if( createBackup )
   {
