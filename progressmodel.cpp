@@ -540,6 +540,30 @@ void ProgressModel::next()
   emit totalTimeChanged();
 }
 
+void ProgressModel::jumpToDay(const int &day, const int &month, const int &year)
+{
+  qDebug("%d/%d/%d",day,month,year);
+
+  m_actualDate = QDateTime::currentDateTime();
+  QDate actualdate = m_actualDate.date();
+
+  int actualyear = actualdate.year();
+  int actualmonth = actualdate.month();
+  int actualday = actualdate.day();
+
+  if( day>0 ) actualday = day;
+  if( month>0 ) actualmonth = month;
+  if( year>0 ) actualyear = year;
+
+  actualdate.setDate(actualyear,actualmonth,actualday);
+  m_actualDate.setDate(actualdate);
+
+  updateItemsList();
+  emit totalTimeChanged();
+  emit actualDateChanged();
+  emit titleChanged();
+}
+
 void ProgressModel::changeSummary()
 {
   m_showSummariesInPercent = !m_showSummariesInPercent;

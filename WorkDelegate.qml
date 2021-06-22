@@ -118,7 +118,7 @@ ItemDelegate {
 
                 Label {
                     id: timeLabel
-                    font.pixelSize: Qt.application.font.pixelSize * 2
+                    font.pixelSize: Qt.application.font.pixelSize * 1.75
                     text: itemTitle(model.projectName,model.summary)
                     color: model.isActive ? "lightgreen" : "white"
                 }
@@ -139,7 +139,7 @@ ItemDelegate {
             }
             Label {
                 text: model.summary
-                font.pixelSize: Qt.application.font.pixelSize * 2
+                font.pixelSize: Qt.application.font.pixelSize * 1.75
                 Layout.alignment: Qt.AlignCenter
                 visible: !projectData.isChangeable
             }

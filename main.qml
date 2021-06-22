@@ -72,13 +72,19 @@ ApplicationWindow {
         id: projectData
     }
 
-    Label {
+    RoundButton {
         id: currentDate
+        text: projectData.title
         anchors.top: parent.top
         anchors.topMargin: 8
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: Qt.application.font.pixelSize * 2
-        text: projectData.title
+        font.pixelSize: Qt.application.font.pixelSize * 1.75
+        font.capitalization: Font.MixedCase
+        onClicked: jumpmenu.open()
+        ToolTip.delay: 2000
+        ToolTip.timeout: 10000
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("Navigation menu")
     }
 
     ListView {
@@ -161,6 +167,56 @@ ApplicationWindow {
         ToolTip.text: qsTr("switch between hours and percent\n(but not in day view)")
     }
 
+    function jumpToDay(day,month,year) {
+        projectData.jumpToDay(day,month,year)
+        jumpmenu.close()
+    }
+
+    Menu {
+        id: jumpmenu
+        width: windowWidth
+        y: currentDate.height+8
+        MenuItem {
+            width: windowWidth // needed for language changes
+            text: qsTr("Show current day")
+            onTriggered: jumpToDay(0,0,0)
+        }
+        RowLayout
+        {
+            RoundButton {
+                id: jumpTo
+                Layout.leftMargin: 8
+                text: qsTr("Show day:")
+                onClicked: jumpToDay(parseInt(jumpday.text),parseInt(jumpmonth.text),parseInt(jumpyear.text))
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+        }
+        RowLayout
+        {
+            width: windowWidth // needed for language changes
+
+            TextField {
+                id: jumpday
+                placeholderText: qsTr("Day")
+                Layout.leftMargin: jumpTo.x+8
+            }
+            TextField {
+                id: jumpmonth
+                placeholderText: qsTr("Month")
+            }
+            TextField {
+                id: jumpyear
+                placeholderText: qsTr("Year")
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+        }
+    }
+
     Menu {
         id: configmenu
         width: windowWidth
@@ -196,6 +252,11 @@ ApplicationWindow {
     }
 
     function changeVisibleAccounts() {
+        displaymenu.close()
+    }
+
+    function changeRecordingAccount(account) {
+        projectData.currentRecordingAccount = account
         displaymenu.close()
     }
 
@@ -276,7 +337,7 @@ ApplicationWindow {
         ComboBox {
             width: windowWidth // needed for language changes
             enabled: projectData.mode==OperatingMode.DisplayRecordDay
-            onActivated: projectData.currentRecordingAccount = currentIndex
+            onActivated: changeRecordingAccount(currentIndex)
             Component.onCompleted: currentIndex = 0
             model: {
                 [ qsTr("Recording at home"), qsTr("Recording in office") ]

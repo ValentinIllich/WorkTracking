@@ -213,143 +213,173 @@
         <translation>Projektverfolgung</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="104"/>
+        <location filename="../main.qml" line="87"/>
+        <source>Navigation menu</source>
+        <translation>Navigationsmenü</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="110"/>
         <source>select previous time period</source>
         <translation>Schritt zurück</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="118"/>
+        <location filename="../main.qml" line="124"/>
         <source>select next time period</source>
         <translation>Schritt vorwärts</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="133"/>
+        <location filename="../main.qml" line="139"/>
         <source>short press: display menu
 long presas: config menu</source>
         <translation>Klick: Zeige Anzeigemenü
 Drücken: Zeige Konfigurationsmenü</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="147"/>
+        <location filename="../main.qml" line="153"/>
         <source>add a new work item</source>
         <translation>Erzeuge neuen Eintrag</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="161"/>
+        <location filename="../main.qml" line="167"/>
         <source>switch between hours and percent
 (but not in day view)</source>
         <translation>Wechsel zwischen Stunden und Prozent
 (nicht in Tagesansicht)</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="170"/>
+        <location filename="../main.qml" line="181"/>
+        <source>Show current day</source>
+        <translation>Zeige aktuellen Tag</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="189"/>
+        <source>Show day:</source>
+        <translation>Zeige Tag:</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="203"/>
+        <source>Day</source>
+        <translation>Tag</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="208"/>
+        <source>Month</source>
+        <translation>Monat</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="212"/>
+        <source>Year</source>
+        <translation>Jahr</translation>
+    </message>
+    <message>
+        <location filename="../main.qml" line="226"/>
         <source>Create default from list</source>
         <oldsource>Make list as default</oldsource>
         <translation>Erzeuge Standard aus Liste</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="179"/>
+        <location filename="../main.qml" line="235"/>
         <source>Select Language</source>
         <translation>Wähle Sprache</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="183"/>
+        <location filename="../main.qml" line="239"/>
         <source>English</source>
         <translation>Englisch</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="188"/>
+        <location filename="../main.qml" line="244"/>
         <source>German</source>
         <translation>Deutsch</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="193"/>
+        <location filename="../main.qml" line="249"/>
         <source>French</source>
         <translation>Französich</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="209"/>
+        <location filename="../main.qml" line="270"/>
         <source>Overview of year</source>
         <translation>Jahersübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="214"/>
+        <location filename="../main.qml" line="275"/>
         <source>Overview of month</source>
         <translation>Monatsübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="219"/>
+        <location filename="../main.qml" line="280"/>
         <source>Overview of week</source>
         <translation>Wochenübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="224"/>
+        <location filename="../main.qml" line="285"/>
         <source>Overview of day</source>
         <translation>Tagesübersicht</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="233"/>
+        <location filename="../main.qml" line="294"/>
         <source>Overview using accounts</source>
         <translation>Übersicht zeigt folgende Konten</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="238"/>
+        <location filename="../main.qml" line="299"/>
         <source>Home</source>
         <translation>Zuhause</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="245"/>
+        <location filename="../main.qml" line="306"/>
         <source>Office</source>
         <translation>Büro</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="271"/>
+        <location filename="../main.qml" line="332"/>
         <source>always show work items</source>
         <translation>Immer Arbeitspakete anzeigen</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="282"/>
+        <location filename="../main.qml" line="343"/>
         <source>Recording at home</source>
         <translation>Zeiterfassung zuhause</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="282"/>
+        <location filename="../main.qml" line="343"/>
         <source>Recording in office</source>
         <translation>Zeiterfassung im Büro</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="290"/>
-        <location filename="../main.qml" line="309"/>
+        <location filename="../main.qml" line="351"/>
+        <location filename="../main.qml" line="370"/>
         <source>copy to clipboard...</source>
         <translation>In Zwischenablage kopieren...</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="313"/>
+        <location filename="../main.qml" line="374"/>
         <source>including recreation time of</source>
         <translation>einschließlich Pausenzeit von</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="318"/>
+        <location filename="../main.qml" line="379"/>
         <source>minutes of rest</source>
         <translation>Minuten Pause</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="324"/>
+        <location filename="../main.qml" line="385"/>
         <source>beginning after</source>
         <translation>nach</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="329"/>
+        <location filename="../main.qml" line="390"/>
         <source>hours</source>
         <translation>Stunden</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="336"/>
+        <location filename="../main.qml" line="397"/>
         <source>Cancel</source>
         <translation>Abbruch</translation>
     </message>
     <message>
-        <location filename="../main.qml" line="340"/>
+        <location filename="../main.qml" line="401"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
