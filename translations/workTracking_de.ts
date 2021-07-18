@@ -4,112 +4,112 @@
 <context>
     <name>ProgressModel</name>
     <message>
-        <location filename="../progressmodel.cpp" line="302"/>
+        <location filename="../progressmodel.cpp" line="312"/>
         <source>January</source>
         <translation>Januar</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="302"/>
+        <location filename="../progressmodel.cpp" line="312"/>
         <source>February</source>
         <translation>Februar</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="302"/>
+        <location filename="../progressmodel.cpp" line="312"/>
         <source>March</source>
         <translation>März</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="302"/>
+        <location filename="../progressmodel.cpp" line="312"/>
         <source>April</source>
         <translation>April</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="302"/>
+        <location filename="../progressmodel.cpp" line="312"/>
         <source>May</source>
         <translation>Mai</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="302"/>
+        <location filename="../progressmodel.cpp" line="312"/>
         <source>June</source>
         <translation>Juni</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="303"/>
+        <location filename="../progressmodel.cpp" line="313"/>
         <source>July</source>
         <translation>Juli</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="303"/>
+        <location filename="../progressmodel.cpp" line="313"/>
         <source>August</source>
         <translation>August</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="303"/>
+        <location filename="../progressmodel.cpp" line="313"/>
         <source>September</source>
         <translation>September</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="303"/>
+        <location filename="../progressmodel.cpp" line="313"/>
         <source>October</source>
         <translation>Oktober</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="303"/>
+        <location filename="../progressmodel.cpp" line="313"/>
         <source>November</source>
         <translation>November</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="303"/>
+        <location filename="../progressmodel.cpp" line="313"/>
         <source>December</source>
         <translation>Dezember</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="310"/>
+        <location filename="../progressmodel.cpp" line="320"/>
         <source>Monday</source>
         <translation>Montag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="310"/>
+        <location filename="../progressmodel.cpp" line="320"/>
         <source>Tuesday</source>
         <translation>Dienstag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="310"/>
+        <location filename="../progressmodel.cpp" line="320"/>
         <source>Wednesday</source>
         <translation>Mittwoch</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="310"/>
+        <location filename="../progressmodel.cpp" line="320"/>
         <source>Thursday</source>
         <translation>Donnerstag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="310"/>
+        <location filename="../progressmodel.cpp" line="320"/>
         <source>Friday</source>
         <translation>Freitag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="310"/>
+        <location filename="../progressmodel.cpp" line="320"/>
         <source>Saturday</source>
         <translation>Samstag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="310"/>
+        <location filename="../progressmodel.cpp" line="320"/>
         <source>Sunday</source>
         <translation>Sonntag</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="317"/>
+        <location filename="../progressmodel.cpp" line="327"/>
         <source>yyyy/MM/dd</source>
         <translation>dd.MM.yyyy</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="332"/>
+        <location filename="../progressmodel.cpp" line="342"/>
         <source>week</source>
         <translation>Woche</translation>
     </message>
     <message>
-        <location filename="../progressmodel.cpp" line="332"/>
+        <location filename="../progressmodel.cpp" line="342"/>
         <source>of year</source>
         <translation>im Jahr</translation>
     </message>
