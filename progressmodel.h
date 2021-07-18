@@ -1,6 +1,7 @@
 #ifndef PROGRESSMODEL_H
 #define PROGRESSMODEL_H
 
+#include <QMap>
 #include <QObject>
 #include <QtQuick>
 
@@ -36,7 +37,7 @@ public:
 
   quint64 getWorkInSeconds(const int &) const;
   void setWorkInSeconds(const int &,const quint64 &);
-  void addWorkInSeconds(const int &,const quint64 &);
+  void addWorkInSeconds(const int &,const qint64 &);
 
 private:
   int m_id                          = 0;
@@ -76,6 +77,14 @@ public:
 
   explicit ProgressModel(QObject *parent = nullptr);
   virtual ~ProgressModel();
+
+  enum StorageType
+  {
+    DataStorage,
+    DefaultListStorage
+  };
+  static void setStorageBaseFileName(StorageType type, QString const &filename);
+  static QString getStorageBaseFileName(StorageType type);
 
   QDateTime actualDate() const;
   void setActualDate(const QDateTime &);
@@ -159,19 +168,20 @@ private:
   QList<ProgressEntry> m_progressEntries;
   QList<ProgressItem*> m_progressItems;
 
-  int m_nextId                        = 12345678;
+  int m_nextId                            = 12345678;
 
-  OperatingMode m_operatingMode       = DisplayRecordDay;
-  bool m_isChangeable                 = true;
-  bool m_alwaysShowWork               = false;
-  int m_selectedAccounts              = eAccountHomework | eAccountOfficeWork;
-  int m_currentRecordingAccount       = 0;
+  OperatingMode m_operatingMode           = DisplayRecordDay;
+  bool m_isChangeable                     = true;
+  bool m_alwaysShowWork                   = false;
+  int m_selectedAccounts                  = eAccountHomework | eAccountOfficeWork;
+  int m_currentRecordingAccount           = 0;
 
-  QVector<quint64> m_totalWorkSeconds = { 0,0 };
-  bool m_showSummariesInPercent       = false;
+  QVector<quint64> m_totalWorkSeconds     = { 0,0 };
+  bool m_showSummariesInPercent           = false;
 
-  quint64 m_runningSeconds            = 0;
-  bool m_dataChanged                  = false;
+  quint64 m_runningSeconds                = 0;
+  bool m_dataChanged                      = false;
+
 };
 
 class ProgressItem : public QObject

@@ -156,12 +156,22 @@ void ProgressEntry::setWorkInSeconds(const int &typeOfWork,const quint64 &work)
   m_workInSeconds[typeOfWork] = work;
 }
 
-void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const quint64 &work)
+void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const qint64 &work)
 {
   while (m_workInSeconds.size()<typeOfWork) m_workInSeconds.push_back(0);
-  m_workInSeconds[typeOfWork] += work;
-  if( m_workInSeconds[typeOfWork]>(24*3600) ) m_workInSeconds[typeOfWork] = 0;
+
+  qint64 current = m_workInSeconds[typeOfWork];
+  current += work;
+  if( current<0 )
+    current = 0;
+
+  m_workInSeconds[typeOfWork] = current;
 }
+
+static QMap<ProgressModel::StorageType,QString> m_storageFile =
+  {{ProgressModel::DataStorage,       "workingOnProjects"},
+   {ProgressModel::DefaultListStorage,"defaultItems"}
+  };
 
 QString getConfigurationsPath(QString const &organization, QString const &application)
 {
@@ -189,7 +199,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   bool todayListIsEmpty = true;
 
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"workingOnProjects.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DataStorage)+".csv";
   QFile file(dataFile);
   file.open(QFile::ReadOnly);
   QTextStream s(&file);
@@ -204,7 +214,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   if( todayListIsEmpty )
   {
-    QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"defaultItems.csv";
+    QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DefaultListStorage)+".csv";
     QFile file(dataFile);
     file.open(QFile::ReadOnly);
     QTextStream s(&file);
@@ -220,7 +230,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 ProgressModel::~ProgressModel()
 {
   if( m_dataChanged )
-    saveData("workingOnProjects", false);
+    saveData(getStorageBaseFileName(DataStorage), false);
 }
 
 QDateTime ProgressModel::actualDate() const
@@ -484,7 +494,7 @@ void ProgressModel::workingTimer()
   {
     if( m_dataChanged )
     {
-      saveData("workingOnProjects", false);
+      saveData(getStorageBaseFileName(DataStorage), false);
       m_dataChanged = false;
     }
   }
@@ -639,7 +649,7 @@ void ProgressModel::setLanguage(const int &lang)
 
 void ProgressModel::createDefaultList()
 {
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/defaultItems.csv";
+  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DefaultListStorage)+".csv";
 
   QFile file(dataFile);
   file.open(QFile::WriteOnly);
@@ -901,6 +911,16 @@ void ProgressModel::saveData(const QString &filename, bool createBackup)
       s << entry.toString() << "\n";
     }
   }
+}
+
+void ProgressModel::setStorageBaseFileName(StorageType type, const QString &filename)
+{
+  m_storageFile[type] = filename;
+}
+
+QString ProgressModel::getStorageBaseFileName(StorageType type)
+{
+  return m_storageFile[type];
 }
 
 ProgressItem::ProgressItem()
