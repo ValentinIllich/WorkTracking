@@ -110,8 +110,6 @@ ItemDelegate {
         model.selectedAccount = account
     }
 
-    onClicked: ListView.view.currentIndex = index
-
     contentItem: ColumnLayout {
         spacing: 0
         ToolTip.delay: 1000
@@ -189,7 +187,7 @@ ItemDelegate {
                     width: 40
                     height: 40
                     visible: root.checked && projectData.isChangeable
-                    onClicked: projectData.remove(root.ListView.view.currentIndex)
+                    onClicked: projectData.remove(model.index)
                 }
             }
 
@@ -203,7 +201,7 @@ ItemDelegate {
                 Button {
                     text: qsTr("Add")
                     visible: root.checked && projectData.isChangeable
-                    onClicked: projectData.addSeconds(root.ListView.view.currentIndex,secondsFromModel(correctionTumbler.currentIndex))
+                    onClicked: projectData.addSeconds(model.index,secondsFromModel(correctionTumbler.currentIndex))
                 }
                 Tumbler {
                     id: correctionTumbler

@@ -187,6 +187,7 @@ private:
 class ProgressItem : public QObject
 {
   Q_OBJECT
+  Q_PROPERTY(int index READ index WRITE setIndex)
   Q_PROPERTY(QString projectName READ projectName WRITE setProjectName NOTIFY projectNameChanged)
   Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
   Q_PROPERTY(bool isActive READ isActive WRITE setIsActive NOTIFY isActiveChanged)
@@ -201,6 +202,9 @@ public:
 
   int getId() const;
   void setId(const int &);
+
+  int index();
+  void setIndex(const int &);
 
   QString projectName() const;
   void setProjectName(const QString &);
@@ -233,6 +237,7 @@ public:
 
 private:
   int m_id                = 0;
+  int m_index             = 0;
   QString m_projectName   = "";
   QString m_description   = "";
   bool m_isActive         = false;

@@ -593,6 +593,7 @@ void ProgressModel::append(const QString &name, const QString &description, cons
   ProgressEntry item {m_nextId++,newTimeStamp,name,description,true,0,{0,0}};
 
   item.setWorkInSeconds(account,spentSeconds);
+  item.setItemCurrentAccount(account);
   m_progressEntries << item;
 
   updateItemsList();
@@ -830,6 +831,11 @@ void ProgressModel::updateItemsList()
     }
   }
 
+  for( int index=0; index<m_progressItems.size(); index++ )
+  {
+    m_progressItems.at(index)->setIndex(index);
+  }
+
   emit itemListChanged();
 }
 
@@ -939,6 +945,16 @@ int ProgressItem::getId() const
 void ProgressItem::setId(const int &id)
 {
   m_id = id;
+}
+
+int ProgressItem::index()
+{
+  return m_index;
+}
+
+void ProgressItem::setIndex(const int &index)
+{
+  m_index = index;
 }
 
 QString ProgressItem::projectName() const
