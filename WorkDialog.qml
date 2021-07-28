@@ -62,8 +62,28 @@ Dialog {
 
     property ProgressModel workDataModel
 
-    function formatNumber(number) {
-        return number < 10 && number >= 0 ? "0" + number : number.toString()
+    function sizeFromHoursModel() {
+        return 9
+    }
+    function formatNumberFromHoursModel(number) {
+        var label = [ "0", "1", "2", "3", "4", "5", "6", "7", "8" ]
+        return label[number]
+    }
+    function hoursFromHoursModel(number) {
+        var hours = [ 0,1,2,3,4,5,6,7,8 ]
+        return hours[number]
+    }
+
+    function sizeFromMinutesModel() {
+        return 7
+    }
+    function formatNumberFromMinutesModel(number) {
+        var label = [ "0", "5", "15", "20", "30", "40", "45" ]
+        return label[number]
+    }
+    function minutesFromMinutesModel(number) {
+        var minutes = [ 0,5,15,20,30,40,45 ]
+        return minutes[number]
     }
 
     onOpened: {
@@ -72,7 +92,7 @@ Dialog {
         minutesTumbler.currentIndex = 0
     }
     onAccepted: {
-        workDataModel.append(projectTitle.text,"",hoursTumbler.currentIndex*3600+minutesTumbler.currentIndex*60,newWorkType.currentIndex)
+        workDataModel.append(projectTitle.text,"",hoursFromHoursModel(hoursTumbler.currentIndex)*3600+minutesFromMinutesModel(minutesTumbler.currentIndex)*60,newWorkType.currentIndex)
     }
     onRejected: workDialog.close()
 
@@ -108,16 +128,16 @@ Dialog {
             }
             Tumbler {
                 id: hoursTumbler
-                model: 24
+                model: sizeFromHoursModel()
                 delegate: TumblerDelegate {
-                    text: formatNumber(modelData)
+                    text: formatNumberFromHoursModel(modelData)
                 }
             }
             Tumbler {
                 id: minutesTumbler
-                model: 60
+                model: sizeFromMinutesModel()
                 delegate: TumblerDelegate {
-                    text: formatNumber(modelData)
+                    text: formatNumberFromMinutesModel(modelData)
                 }
             }
         }

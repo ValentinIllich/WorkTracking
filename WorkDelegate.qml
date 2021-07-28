@@ -61,9 +61,16 @@ ItemDelegate {
     width: parent.width
     checkable: true
 
-    function formatNumber(number) {
-        var label = [ "-30", "-25", "-20", "-15", "-10", "-05", "00", "05", "10", "15", "20", "25", "30" ]
+    function sizeFromModel() {
+        return 7
+    }
+    function formatNumberFromModel(number) {
+        var label = [ "-30", "-15", "-5", "0", "5", "15", "30" ]
         return label[number]
+    }
+    function secondsFromModel(number) {
+        var seconds = [ -30,-15,-5, 0, 5,15,30 ]
+        return seconds[number]*60
     }
 
     function itemTitle(projectName,summary)
@@ -196,17 +203,15 @@ ItemDelegate {
                 Button {
                     text: qsTr("Add")
                     visible: root.checked && projectData.isChangeable
-                    onClicked: projectData.addSeconds(root.ListView.view.currentIndex,(correctionTumbler.currentIndex-6)*60*5)
+                    onClicked: projectData.addSeconds(root.ListView.view.currentIndex,secondsFromModel(correctionTumbler.currentIndex))
                 }
                 Tumbler {
-                    // 0    1   2   3   4   5   6   7   8   9   10  11  12  thumbler index
-                    // -30  -25 -20 -15 -10 -5  0   5   10  15  20  25  30  time diff in minutes
                     id: correctionTumbler
-                    model: 13
+                    model: sizeFromModel()
                     delegate: TumblerDelegate {
-                        text: formatNumber(modelData)
+                        text: formatNumberFromModel(modelData)
                     }
-                    currentIndex: 6
+                    currentIndex: 3
                     visible: root.checked && projectData.isChangeable
                 }
                 Label {
