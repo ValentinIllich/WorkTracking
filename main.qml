@@ -78,7 +78,7 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.topMargin: 8
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: Qt.application.font.pixelSize * 1.75
+        font.pixelSize: Qt.application.font.pixelSize * 2
         font.capitalization: Font.MixedCase
         onClicked: jumpmenu.open()
         ToolTip.delay: 2000
@@ -146,11 +146,27 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 8
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: -helpButton.width / 2
         onClicked: workDialog.open()
         ToolTip.delay: 2000
         ToolTip.timeout: 10000
         ToolTip.visible: hovered
         ToolTip.text: qsTr("add a new work item")
+    }
+
+    RoundButton {
+        id: helpButton
+        text: "?"
+        visible: projectData.isChangeable
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 8
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: addAlarmButton.width / 2
+        onClicked: projectData.showHelp()
+        ToolTip.delay: 2000
+        ToolTip.timeout: 10000
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("open documentation")
     }
 
     RoundButton {

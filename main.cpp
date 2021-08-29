@@ -62,8 +62,10 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-
     QGuiApplication app(argc, argv);
+    //app.setFont(QFont("SanSerif",9)); // Win 10
+    app.setFont(QFont("SanSerif",12)); // Mac
+
     qmlRegisterType<ProgressModel>("ProjectsData", 1,0, "ProgressModel");
     qmlRegisterType<ProgressItem>("ProjectsData", 1,0, "ProgressItem");
     qmlRegisterUncreatableType<ProgressModel>("ProjectsData", 1, 0, "OperatingMode", "Access to enums & flags only");
