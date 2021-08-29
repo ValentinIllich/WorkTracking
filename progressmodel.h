@@ -20,6 +20,9 @@ public:
   QDateTime getTimeStamp() const;
   void setTimeStamp(const QDateTime &);
 
+  QDateTime getRecordingStart(const int &) const;
+  void setRecordingStart(const int &,const QDateTime &);
+
   QString getItemName() const;
   void setItemName(const QString &);
 
@@ -40,13 +43,14 @@ public:
   void addWorkInSeconds(const int &,const qint64 &);
 
 private:
-  int m_id                          = 0;
-  QDateTime m_timeStamp             = QDateTime::currentDateTime();
-  QString m_name                    = "";
-  QString m_description             = "";
-  bool    m_active                  = false;
-  int     m_account                 = 0;
-  QVector<quint64> m_workInSeconds  = {0,0};
+  int m_id                            = 0;
+  QDateTime m_timeStamp               = QDateTime::currentDateTime();
+  QString m_name                      = "";
+  QString m_description               = "";
+  bool    m_active                    = false;
+  int     m_account                   = 0;
+  QVector<quint64> m_workInSeconds    = {0,0};
+  QVector<QDateTime> m_recordingStart = { QDateTime(),QDateTime() };
 };
 
 class ProgressModel : public QObject
@@ -147,6 +151,8 @@ public:
   Q_INVOKABLE bool getAccountSelected(const int &);
   Q_INVOKABLE void setAccountSelected(const int &, const bool &);
 
+  Q_INVOKABLE void showHelp();
+
   static void setQmlEngine(QQmlApplicationEngine &engine);
 
 private:
@@ -160,6 +166,7 @@ private:
   QString humanReadableDate(QDateTime date);
 
   quint64 getSummaryWorkInSeconds(ProgressEntry const &entry, int account = -1) const;
+  QDateTime getFirstRecordingTime(const ProgressEntry &entry,int account) const;
   QString getSummaryText(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;
 
   void saveData(QString const &filename, bool createBackup = false);
@@ -181,7 +188,7 @@ private:
 
   quint64 m_runningSeconds                = 0;
   bool m_dataChanged                      = false;
-
+  qint64 m_lastElapsed                    = 0;
 };
 
 class ProgressItem : public QObject
@@ -221,6 +228,9 @@ public:
   QDateTime timeStamp() const;
   void setTimeStamp(const QDateTime &);
 
+  QDateTime getRecordingStart() const;
+  void setRecordingStart(const QDateTime &);
+
   qint64 workInSeconds() const;
   void setWorkInSeconds(const qint64 seconds);
 
@@ -243,6 +253,7 @@ private:
   bool m_isActive         = false;
   int m_selectedAccount   = 0;
   QDateTime m_timeStamp   = QDateTime::currentDateTime();
+  QDateTime m_recording   = QDateTime();
   qint64 m_workInSeconds  = 0;
   QString m_summaryText   = 0;
 };

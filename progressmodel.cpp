@@ -1,4 +1,5 @@
 #include "progressmodel.h"
+#include "../backup/Utilities.h"
 
 QQmlEngine *m_qmlEngine;
 
@@ -28,6 +29,7 @@ ProgressEntry(int itemId, const QString &fromString)
   : ProgressEntry()
 {
   int workIndex = 0;
+  int recIndex = 0;
   m_id = itemId;
 
   QStringList properties = fromString.split(";");
@@ -43,6 +45,16 @@ ProgressEntry(int itemId, const QString &fromString)
         m_description = item.mid(6);
       if( item.contains("creat=") )
         m_timeStamp = QDateTime::fromSecsSinceEpoch(item.mid(6).toLongLong());;
+      if( item.contains("recor=") )
+      {
+        qint64 secsSinceEpoch = item.mid(6).toLongLong();
+        QDateTime time = secsSinceEpoch>=0 ? QDateTime::fromSecsSinceEpoch(secsSinceEpoch) : QDateTime();
+        if( recIndex==m_recordingStart.size() )
+          m_recordingStart.push_back(time);
+        else
+          m_recordingStart[recIndex] = time;
+        recIndex++;
+      }
       if( item.contains("spent=") )
       {
         if( workIndex==m_workInSeconds.size() )
@@ -72,7 +84,9 @@ QString ProgressEntry::toString() const
           + "descr=" +                    m_description + ";"
           + "creat=" +    QString::number(m_timeStamp.toSecsSinceEpoch()) + ";"
           + "spent=" +    QString::number(m_workInSeconds[0]) + ";"
-          + "spent=" +    QString::number(m_workInSeconds[1]);// + ";"
+          + "spent=" +    QString::number(m_workInSeconds[1]) + ";"
+          + "recor=" +    QString::number(m_recordingStart[0].isValid() ? m_recordingStart[0].toSecsSinceEpoch() : -1) + ";"
+          + "recor=" +    QString::number(m_recordingStart[1].isValid() ? m_recordingStart[1].toSecsSinceEpoch() : -1);// + ";"
            //"" +                   (m_doneHome ? "h" : "o");
 }
 
@@ -84,6 +98,16 @@ int ProgressEntry::getId() const
 QDateTime ProgressEntry::getTimeStamp() const
 {
   return m_timeStamp;
+}
+
+QDateTime ProgressEntry::getRecordingStart(const int &typeOfWork) const
+{
+  return m_recordingStart[typeOfWork];
+}
+
+void ProgressEntry::setRecordingStart(const int &typeOfWork, const QDateTime &time)
+{
+  m_recordingStart[typeOfWork] = time;
 }
 
 void ProgressEntry::setTimeStamp(const QDateTime &time)
@@ -160,6 +184,9 @@ void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const qint64 &work)
 {
   while (m_workInSeconds.size()<typeOfWork) m_workInSeconds.push_back(0);
 
+  if( m_workInSeconds[typeOfWork]==0 )
+    m_recordingStart[typeOfWork] = QDateTime::currentDateTime();
+
   qint64 current = m_workInSeconds[typeOfWork];
   current += work;
   if( current<0 )
@@ -195,7 +222,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   QTimer *timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(workingTimer()));
-  timer->start(1000);
+  timer->start(200);
 
   bool todayListIsEmpty = true;
 
@@ -294,12 +321,19 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       timespent += 150; // round in range of 5 minutes
       timespent = (timespent / 300) * 300;
 
-      QDateTime startDateTime = QDateTime::currentDateTime();
+      qDebug("+++ creation of %s is %s",item->projectName().toLatin1().data(),item->timeStamp().toString().toLatin1().data());
+      QDateTime startDateTime = item->getRecordingStart();
+      if( !startDateTime.isValid() )
+        startDateTime = item->timeStamp();
+
       QTime startTime = startDateTime.time();
-      startTime.setHMS(8,0,0);
+      int HH = startTime.hour();
+      int MM = (startTime.minute()/5)*5;
+
+      startTime.setHMS(HH,MM,0);
       QTime endTime = startTime.addSecs(timespent);
 
-      data += item->projectName() + "\t" + "08:00" + "\t" + endTime.toString("hh:mm") + "\n";
+      data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\n";
     }
   }
 
@@ -473,12 +507,21 @@ void ProgressModel::itemAccountChanged()
 
 void ProgressModel::workingTimer()
 {
+  QDateTime current = QDateTime::currentDateTime();
+  qint64 elapsed = current.currentSecsSinceEpoch();
+
+  if( elapsed==m_lastElapsed)
+    return;
+
+  qint64 delta = elapsed-m_lastElapsed;
+  m_lastElapsed = elapsed;
+
   for( int i=0; i<m_progressEntries.size(); i++ )
   {
     if( m_progressEntries[i].getItemActive() )
     {
       m_dataChanged = true;
-      m_progressEntries[i].addWorkInSeconds(m_currentRecordingAccount,1);
+      m_progressEntries[i].addWorkInSeconds(m_currentRecordingAccount,delta);
       for( int j=0; j<m_progressItems.size(); j++ )
       {
         if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
@@ -681,6 +724,11 @@ void ProgressModel::setAccountSelected(const int &account, const bool &enabled)
   emit totalTimeChanged();
 }
 
+void ProgressModel::showHelp()
+{
+  ::showHelp(nullptr,":/ressources/workTracking.pdf","workTrackingHelp.pdf");
+}
+
 void ProgressModel::setQmlEngine(QQmlApplicationEngine &engine)
 {
   m_qmlEngine = &engine;
@@ -737,8 +785,18 @@ void ProgressModel::updateItemsList()
       else
       {
         if( !weekDayMap.contains(item.getTimeStamp().date().dayOfWeek()) )
-          weekDayMap[item.getTimeStamp().date().dayOfWeek()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
+        {
+          weekDayMap[item.getTimeStamp().date().dayOfWeek()] = ProgressEntry{0, item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
+          weekDayMap[item.getTimeStamp().date().dayOfWeek()].setRecordingStart(0,QDateTime());
+        }
         weekDayMap[item.getTimeStamp().date().dayOfWeek()].addAllWorkInSeconds(item.getAllWorkInSeconds());
+        QDateTime firstRecordingSummary = weekDayMap[item.getTimeStamp().date().dayOfWeek()].getRecordingStart(0);
+        QDateTime firstRecordingItem = getFirstRecordingTime(item,-1);
+        if( firstRecordingItem.isValid() )
+        {
+          if( !firstRecordingSummary.isValid() || firstRecordingItem<firstRecordingSummary )
+            weekDayMap[item.getTimeStamp().date().dayOfWeek()].setRecordingStart(0,firstRecordingItem);
+        }
       }
       break;
     case DisplayRecordDay:
@@ -762,6 +820,7 @@ void ProgressModel::updateItemsList()
       ProgressItem *entry = new ProgressItem();
       entry->setId(item.getId());
       entry->setProjectName(key);
+      entry->setTimeStamp(item.getTimeStamp());
       entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
       entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
@@ -801,6 +860,7 @@ void ProgressModel::updateItemsList()
         entry->setId(item.getId());
         entry->setProjectName(humanReadableWeekDay(day) + " " + humanReadableDate(item.getTimeStamp()));
         entry->setTimeStamp(item.getTimeStamp());
+        entry->setRecordingStart(item.getRecordingStart(0));
         entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
@@ -851,6 +911,27 @@ quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry,int ac
   }
 
   return value;
+}
+
+QDateTime ProgressModel::getFirstRecordingTime(const ProgressEntry &entry,int account) const
+{
+  QDateTime firstTime;
+
+  if( account>=0 )
+    firstTime = entry.getRecordingStart(account);
+  else
+  {
+    if( (m_selectedAccounts & eAccountHomework)!=0 )
+    {
+      if( !firstTime.isValid() || (entry.getRecordingStart(0).isValid() && entry.getRecordingStart(0)<firstTime) ) firstTime = entry.getRecordingStart(0);
+    }
+    if( (m_selectedAccounts & eAccountOfficeWork)!=0 )
+    {
+      if( !firstTime.isValid() || (entry.getRecordingStart(1).isValid() && entry.getRecordingStart(1)<firstTime) ) firstTime = entry.getRecordingStart(1);
+    }
+  }
+
+  return firstTime;
 }
 
 QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat) const
@@ -1010,6 +1091,16 @@ void ProgressItem::setTimeStamp(const QDateTime &time)
 {
   m_timeStamp = time;
   emit timeStampChanged();
+}
+
+QDateTime ProgressItem::getRecordingStart() const
+{
+  return m_recording;
+}
+
+void ProgressItem::setRecordingStart(const QDateTime &time)
+{
+  m_recording = time;
 }
 
 qint64 ProgressItem::workInSeconds() const
