@@ -1,0 +1,16 @@
+Major;Setup ID;;Minor;;
+1;88C45A0C-39E4-4EF8-9B47-8A64AE5130CD;;10;;
+WindowTitle;Welcome Text (File);Completion Text (File);Lic Text File;Component(s);
+VISolutions Worktracker;Welcome!;The software is now ready to use.;;;
+Item Type;Source Path;Destination Path;Attributes;Component(s);Target
+#;;;;;
+#;########## installing application itself ##########;;;;
+#;;;;;
+d;/Users/valentinillich/Programme/workTrackerPro_release/workTracking.app;<APPDIR>/VISolutions/Work Tracking/workTracking.app;copySrc;;mac
+d;C:/Users/family/Programme/workTrackerWin_release/release;<APPDIR>/VISolutions/Work Tracking;copySrc;;win32
+#;;;;;
+#;########## creating startup link ##########;;;;
+#lcs;;<APPDIR>/VISolutions/Automatic Backup/backup.app;;;mac
+#lcs;<APPDIR>/VISolutions/backup.ico;<APPDIR>/VISolutions/Automatic Backup/backup.exe;;;win32
+#lcd;;<APPDIR>/VISolutions/Automatic Backup/backup.app;;;mac
+#lcd;<APPDIR>/VISolutions/backup.ico;<APPDIR>/VISolutions/Automatic Backup/backup.exe;;;win32
