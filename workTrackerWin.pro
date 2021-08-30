@@ -1,8 +1,9 @@
 TEMPLATE = app
 TARGET = workTracking
-QT += quick
+QT += quick widgets
 
 SOURCES += main.cpp \
+    ../backup/utilities.cpp \
     progressmodel.cpp
 
 TRANSLATIONS = \
@@ -12,6 +13,7 @@ TRANSLATIONS = \
 RESOURCES += qml.qrc
 
 HEADERS += \
+    ../backup/Utilities.h \
     progressmodel.h
 
 win32 {
