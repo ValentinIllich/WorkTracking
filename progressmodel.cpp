@@ -177,7 +177,8 @@ quint64 ProgressEntry::getWorkInSeconds(const int &typeOfWork) const
 void ProgressEntry::setWorkInSeconds(const int &typeOfWork,const quint64 &work)
 {
   while (m_workInSeconds.size()<typeOfWork) m_workInSeconds.push_back(0);
-  m_workInSeconds[typeOfWork] = work;
+  m_workInSeconds[typeOfWork] = 0;
+  addWorkInSeconds(typeOfWork,work);
 }
 
 void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const qint64 &work)
@@ -186,6 +187,19 @@ void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const qint64 &work)
 
   if( m_workInSeconds[typeOfWork]==0 )
     m_recordingStart[typeOfWork] = QDateTime::currentDateTime();
+
+  if( work>0 )
+  {
+    QDateTime currentTime = QDateTime::currentDateTime();
+    QTime firstRecordTime = currentTime.time().addSecs(-work);
+    if( m_recordingStart[typeOfWork].isValid() )
+    {
+      if( m_recordingStart[typeOfWork].time()>=firstRecordTime )
+        m_recordingStart[typeOfWork].setTime(firstRecordTime);
+    }
+//    if( m_timeStamp.time()>=firstRecordTime )
+//      m_timeStamp.setTime(firstRecordTime);
+  }
 
   qint64 current = m_workInSeconds[typeOfWork];
   current += work;
