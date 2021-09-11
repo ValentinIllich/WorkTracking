@@ -63,8 +63,11 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
-    //app.setFont(QFont("SanSerif",9)); // Win 10
+#if defined(Q_OS_WIN32)
+    app.setFont(QFont("SanSerif",9)); // Win 10
+#else
     app.setFont(QFont("SanSerif",12)); // Mac
+#endif
 
     qmlRegisterType<ProgressModel>("ProjectsData", 1,0, "ProgressModel");
     qmlRegisterType<ProgressItem>("ProjectsData", 1,0, "ProgressItem");
