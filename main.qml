@@ -53,6 +53,7 @@ import QtQuick.Controls 2.4
 import QtQuick.Controls.Material 2.4
 import QtQuick.Layouts 1.11
 import QtQuick.Window 2.11
+import Qt.labs.settings 1.0
 import QtQuick.Dialogs 1.0
 import Qt.labs.calendar 1.0
 
@@ -67,6 +68,13 @@ ApplicationWindow {
     height: windowHeight
     visible: true
     title: qsTr("Project Work")
+
+    Settings {
+         property alias x: window.x
+         property alias y: window.y
+         property alias width: window.width
+         property alias height: window.height
+     }
 
     ProgressModel {
         id: projectData
