@@ -60,21 +60,23 @@ import Qt.labs.calendar 1.0
 import ProjectsData 1.0
 
 ApplicationWindow {
-    property int windowWidth: 400
-    property int windowHeight: 600
+    property int windowx: projectData.geometry.x
+    property int windowy: projectData.geometry.y
+    property int windowWidth: projectData.geometry.width
+    property int windowHeight: projectData.geometry.height
 
     id: window
+    x: windowx
+    y: windowy
     width: windowWidth
     height: windowHeight
     visible: true
     title: qsTr("Project Work")
 
-    Settings {
-         property alias x: window.x
-         property alias y: window.y
-         property alias width: window.width
-         property alias height: window.height
-     }
+    onXChanged: projectData.geometry = Qt.rect(x, y, width, height)
+    onYChanged: projectData.geometry = Qt.rect(x, y, width, height)
+    onWidthChanged: projectData.geometry = Qt.rect(x, y, width, height)
+    onHeightChanged: projectData.geometry = Qt.rect(x, y, width, height)
 
     ProgressModel {
         id: projectData
@@ -389,32 +391,94 @@ ApplicationWindow {
         width: parent.width
 
         ColumnLayout {
-            anchors.fill: parent
+                width: windowWidth
+                //anchors.fill: parent
                 Label {
                     text: qsTr("copy to clipboard...")
                     visible: !projectData.showSumInPercent
                 }
-                Label {
-                    text: qsTr("including recreation time of")
+                RowLayout {
                     visible: !projectData.showSumInPercent
+                    Label {
+                        text: qsTr("including recreation time of")
+                        visible: !projectData.showSumInPercent
+                    }
+                    TextField {
+                      id: additionalminutes
+                      placeholderText: qsTr("minutes of rest")
+                      visible: !projectData.showSumInPercent
+                      cursorVisible: true
+                      text: ""
+                    }
                 }
-                TextField {
-                  id: additionalminutes
-                  placeholderText: qsTr("minutes of rest")
-                  visible: !projectData.showSumInPercent
-                  cursorVisible: true
-                  text: ""
-                }
-                Label {
-                    text: qsTr("beginning after")
+                RowLayout {
                     visible: !projectData.showSumInPercent
+                    Label {
+                        text: qsTr("beginning after")
+                        visible: !projectData.showSumInPercent
+                    }
+                    TextField {
+                      id: thresholdofrest
+                      placeholderText: qsTr("hours")
+                      visible: !projectData.showSumInPercent
+                      cursorVisible: true
+                      text: ""
+                    }
                 }
-                TextField {
-                  id: thresholdofrest
-                  placeholderText: qsTr("hours")
-                  visible: !projectData.showSumInPercent
-                  cursorVisible: true
-                  text: ""
+                RowLayout
+                {
+                    RoundButton {
+                        text: qsTr("Mo")
+                        checked: projectData.getWeekdaySelected(0)
+                        checkable: true
+                        Material.background: checked ? Material.accent : "transparent"
+                        onToggled: projectData.setWeekdaySelected(0,checked)
+                    }
+                    RoundButton {
+                        text: qsTr("Tu")
+                        checked: projectData.getWeekdaySelected(1)
+                        checkable: true
+                        Material.background: checked ? Material.accent : "transparent"
+                        onToggled: projectData.setWeekdaySelected(1,checked)
+                    }
+                    RoundButton {
+                        text: qsTr("We")
+                        checked: projectData.getWeekdaySelected(2)
+                        checkable: true
+                        Material.background: checked ? Material.accent : "transparent"
+                        onToggled: projectData.setWeekdaySelected(2,checked)
+                    }
+                    RoundButton {
+                        text: qsTr("Th")
+                        checked: projectData.getWeekdaySelected(3)
+                        checkable: true
+                        Material.background: checked ? Material.accent : "transparent"
+                        onToggled: projectData.setWeekdaySelected(3,checked)
+                    }
+                    RoundButton {
+                        text: qsTr("Fr")
+                        checked: projectData.getWeekdaySelected(4)
+                        checkable: true
+                        Material.background: checked ? Material.accent : "transparent"
+                        onToggled: projectData.setWeekdaySelected(4,checked)
+                    }
+                }
+                RowLayout
+                {
+                    RoundButton {
+                        text: qsTr("Sa")
+                        checked: projectData.getWeekdaySelected(5)
+                        checkable: true
+                        Material.background: checked ? Material.accent : "transparent"
+                        onToggled: projectData.setWeekdaySelected(5,checked)
+                    }
+                    RoundButton {
+                        text: qsTr("Su")
+                        checked: projectData.getWeekdaySelected(6)
+                        checkable: true
+                        Material.background: checked ? Material.accent : "transparent"
+                        onToggled: projectData.setWeekdaySelected(6,checked)
+                    }
                 }
                 RowLayout {
                     Button {

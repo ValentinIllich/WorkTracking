@@ -24,8 +24,7 @@ ProgressEntry::ProgressEntry(int id, QDateTime timestamp, QString name, QString 
     m_workInSeconds.push_back(0);
 }
 
-ProgressEntry::
-ProgressEntry(int itemId, const QString &fromString)
+ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
   : ProgressEntry()
 {
   int workIndex = 0;
@@ -230,7 +229,9 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   QSettings settings("VISolutions","project-tracker");
   if( settings.contains("language-id") )
-    changeLanguage(settings.value("language-id").toInt());
+    changeLanguage(settings.value("window-geometry").toInt());
+  if( settings.contains("window-geometry") )
+    m_windowGeometry = settings.value("window-geometry").toRect();
 
   m_actualDate = QDateTime::currentDateTime();
 
@@ -272,6 +273,9 @@ ProgressModel::~ProgressModel()
 {
   if( m_dataChanged )
     saveData(getStorageBaseFileName(DataStorage), false);
+
+  QSettings settings("VISolutions","project-tracker");
+  settings.setValue("window-geometry",m_windowGeometry);
 }
 
 QDateTime ProgressModel::actualDate() const
@@ -314,6 +318,8 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
 {
   updateItemsList();
 
+  quint64 threashold = thresholdHours.toULong();
+  quint64 additional = additionalMinutes.toULong();
 
   QClipboard *clipboard = QGuiApplication::clipboard();
   QString data;
@@ -328,9 +334,19 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
     }
     else
     {
+      int dayofweek = item->timeStamp().date().dayOfWeek() - 1;
       quint64 timespent = item->workInSeconds();
-      if( timespent>(thresholdHours.toULong()*3600) )
-        timespent += additionalMinutes.toULong()*60;
+      quint64 totalSpent = item->totalWorkInSeconds();
+      bool includingRecreation = false;
+
+      if( getWeekdaySelected(dayofweek) )
+      {
+        if( threashold>0 && totalSpent>(threashold*3600) )
+        {
+          timespent += additional*60;
+          includingRecreation = true;
+        }
+      }
 
       timespent += 150; // round in range of 5 minutes
       timespent = (timespent / 300) * 300;
@@ -345,9 +361,35 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       int MM = (startTime.minute()/5)*5;
 
       startTime.setHMS(HH,MM,0);
-      QTime endTime = startTime.addSecs(timespent);
 
-      data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\n";
+      // list of interruptions for the day
+      QList<quint64> workingBlockLengths;
+      QList<quint64> workingBlocksInterrupt;
+      workingBlockLengths << 5*3600;
+      workingBlocksInterrupt << 45*60;
+      //
+      if( timespent>0 )
+      {
+        quint64 nextBlockLen = workingBlockLengths.takeFirst();
+        quint64 nextInterruptLen = workingBlocksInterrupt.takeFirst();
+
+        while( timespent>nextBlockLen )
+        {
+          QTime endTime = startTime.addSecs(nextBlockLen);
+          data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\n";
+          startTime = startTime.addSecs(nextBlockLen + nextInterruptLen);
+          timespent -= nextBlockLen;
+
+          if( workingBlockLengths.isEmpty() )
+            break;
+
+          nextBlockLen =  workingBlockLengths.takeFirst();
+          nextInterruptLen = workingBlocksInterrupt.takeFirst();
+        }
+        QTime endTime = startTime.addSecs(timespent);
+        QString comment = includingRecreation ? "inkl. Pause" : "";
+        data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\t" + comment + "\n";
+      }
     }
   }
 
@@ -530,10 +572,12 @@ void ProgressModel::workingTimer()
   qint64 delta = elapsed-m_lastElapsed;
   m_lastElapsed = elapsed;
 
+  bool isCurrnetIdle = true;
   for( int i=0; i<m_progressEntries.size(); i++ )
   {
     if( m_progressEntries[i].getItemActive() )
     {
+      isCurrnetIdle = false;
       m_dataChanged = true;
       m_progressEntries[i].addWorkInSeconds(m_currentRecordingAccount,delta);
       for( int j=0; j<m_progressItems.size(); j++ )
@@ -545,6 +589,28 @@ void ProgressModel::workingTimer()
       }
     }
   }
+
+//  if( isCurrnetIdle )
+//    m_idleSinceSeconds++;
+//  else if( m_recordedSeconds>0 && m_idleSinceSeconds>300 ) // only with home ???
+//  {
+//    // create an item for the rest
+//    QDateTime startOfRest = QDateTime::fromSecsSinceEpoch(elapsed-m_idleSinceSeconds);
+//    QDateTime endOfRest = startOfRest.addSecs(m_idleSinceSeconds);
+
+//    ProgressEntry item {m_nextId++,startOfRest,"-"
+//        ,startOfRest.time().toString("HH:mm")+"-"+endOfRest.time().toString("HH:mm")
+//        ,false,0,{0,0}};
+//    item.setWorkInSeconds(0,m_idleSinceSeconds);
+//    item.setItemCurrentAccount(0);
+//    m_progressEntries << item;
+
+//    m_idleSinceSeconds = 0;
+
+//    updateItemsList();
+//  }
+//  else
+//    m_recordedSeconds++;
 
   m_runningSeconds++;
   if( (m_runningSeconds % 300) == 0)
@@ -738,6 +804,19 @@ void ProgressModel::setAccountSelected(const int &account, const bool &enabled)
   emit totalTimeChanged();
 }
 
+bool ProgressModel::getWeekdaySelected(const int &wday)
+{
+   return (m_selectedWeeekdays & (0x1<<wday))!=0;
+}
+
+void ProgressModel::setWeekdaySelected(const int &wday, const bool &state)
+{
+  if( state )
+    m_selectedWeeekdays |= (0x1<<wday);
+  else
+    m_selectedWeeekdays &= ~(0x1<<wday);
+}
+
 void ProgressModel::showHelp()
 {
   ::showHelp(nullptr,":/ressources/workTracking.pdf","workTrackingHelp.pdf");
@@ -836,6 +915,7 @@ void ProgressModel::updateItemsList()
       entry->setProjectName(key);
       entry->setTimeStamp(item.getTimeStamp());
       entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+      entry->setTotalWorkInSeconds(getSummaryWorkInSeconds(item,true));
       entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
       entry->connect(entry,SIGNAL(projectNameChanged()),this,SLOT(itemNameChanged()));
@@ -856,6 +936,7 @@ void ProgressModel::updateItemsList()
         entry->setProjectName(humanReadableMonth(month));
         entry->setTimeStamp(item.getTimeStamp());
         entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+        entry->setTotalWorkInSeconds(getSummaryWorkInSeconds(item,true));
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
@@ -872,10 +953,11 @@ void ProgressModel::updateItemsList()
 
         ProgressItem *entry = new ProgressItem();
         entry->setId(item.getId());
-        entry->setProjectName(humanReadableWeekDay(day) + " " + humanReadableDate(item.getTimeStamp()));
+        entry->setProjectName(humanReadableWeekDay(day) + "\t" + humanReadableDate(item.getTimeStamp()));
         entry->setTimeStamp(item.getTimeStamp());
         entry->setRecordingStart(item.getRecordingStart(0));
         entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+        entry->setTotalWorkInSeconds(getSummaryWorkInSeconds(item,true));
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
@@ -894,6 +976,7 @@ void ProgressModel::updateItemsList()
       entry->setSelectedAccount(item.getItemCurrentAccount());
       entry->setTimeStamp(item.getTimeStamp());
       entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
+      entry->setTotalWorkInSeconds(getSummaryWorkInSeconds(item,true));
       entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
       entry->connect(entry,SIGNAL(isActiveChanged()),this,SLOT(itemStateChanged()));
@@ -913,11 +996,14 @@ void ProgressModel::updateItemsList()
   emit itemListChanged();
 }
 
-quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry,int account) const
+quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry,bool getTotalSummary) const
 {
   quint64 value = 0;
-  if( account>=0 )
-    value = entry.getWorkInSeconds(account);
+  if( getTotalSummary )
+  {
+    value += entry.getWorkInSeconds(0);
+    value += entry.getWorkInSeconds(0);
+  }
   else
   {
     if( (m_selectedAccounts & eAccountHomework)!=0 ) value += entry.getWorkInSeconds(0);
@@ -1022,6 +1108,17 @@ void ProgressModel::setStorageBaseFileName(StorageType type, const QString &file
 QString ProgressModel::getStorageBaseFileName(StorageType type)
 {
   return m_storageFile[type];
+}
+
+QRect ProgressModel::geometry() const
+{
+  return m_windowGeometry;
+}
+
+void ProgressModel::setGeometry(const QRect &rect)
+{
+  m_windowGeometry = rect;
+  emit geometryChanged();
 }
 
 ProgressItem::ProgressItem()
@@ -1129,6 +1226,20 @@ void ProgressItem::setWorkInSeconds(const qint64 seconds)
   else
     m_workInSeconds = 0;
   emit workInSecondsChanged();
+}
+
+qint64 ProgressItem::totalWorkInSeconds() const
+{
+  return m_totalWorkInSeconds;
+}
+
+void ProgressItem::setTotalWorkInSeconds(const qint64 seconds)
+{
+  if( seconds>=0 )
+    m_totalWorkInSeconds = seconds;
+  else
+    m_totalWorkInSeconds = 0;
+  emit totalWorkInSecondsChanged();
 }
 
 QString ProgressItem::summary() const

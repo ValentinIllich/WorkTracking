@@ -82,7 +82,7 @@ ItemDelegate {
         case OperatingMode.DisplayMonth:
             return projectName
         case OperatingMode.DisplayWeek:
-                return projectName
+                return projectName.replace("\t"," ")
         case OperatingMode.DisplayRecordDay:
             return summary + " " + projectName
         }
@@ -110,8 +110,17 @@ ItemDelegate {
         model.selectedAccount = account
     }
 
+    function checkVisibility(title)
+    {
+        if( title === "dffeerfe" )
+            return false
+        else
+            return true
+    }
+
     contentItem: ColumnLayout {
         spacing: 0
+        visible: checkVisibility(model.projectName)
         ToolTip.delay: 1000
         ToolTip.timeout: 2000
         ToolTip.visible: hovered && !root.checked && projectData.isChangeable

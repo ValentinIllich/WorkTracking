@@ -57,6 +57,8 @@ class ProgressModel : public QObject
 {
   Q_OBJECT
 
+  Q_PROPERTY(QRect geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
+
   Q_PROPERTY(QDateTime actualDate READ actualDate WRITE setActualDate NOTIFY actualDateChanged)
   Q_PROPERTY(OperatingMode mode READ mode WRITE setMode NOTIFY modeChanged)
   Q_PROPERTY(int currentRecordingAccount READ currentRecordingAccount WRITE setCurrentRecordingAccount NOTIFY currentRecordingAccountChanged)
@@ -90,6 +92,9 @@ public:
   static void setStorageBaseFileName(StorageType type, QString const &filename);
   static QString getStorageBaseFileName(StorageType type);
 
+  QRect geometry() const;
+  void setGeometry(const QRect &rect);
+
   QDateTime actualDate() const;
   void setActualDate(const QDateTime &);
 
@@ -119,6 +124,7 @@ public:
   Q_SLOT void itemAccountChanged();
   Q_SLOT void workingTimer();
 
+  Q_SIGNAL void geometryChanged();
   Q_SIGNAL void actualDateChanged();
   Q_SIGNAL void modeChanged();
   Q_SIGNAL void currentRecordingAccountChanged();
@@ -151,6 +157,9 @@ public:
   Q_INVOKABLE bool getAccountSelected(const int &);
   Q_INVOKABLE void setAccountSelected(const int &, const bool &);
 
+  Q_INVOKABLE bool getWeekdaySelected(const int &);
+  Q_INVOKABLE void setWeekdaySelected(const int &, const bool &);
+
   Q_INVOKABLE void showHelp();
 
   static void setQmlEngine(QQmlApplicationEngine &engine);
@@ -165,7 +174,7 @@ private:
   QString humanReadableWeekDay(int weekday);
   QString humanReadableDate(QDateTime date);
 
-  quint64 getSummaryWorkInSeconds(ProgressEntry const &entry, int account = -1) const;
+  quint64 getSummaryWorkInSeconds(ProgressEntry const &entry, bool getTotalSummary = false) const;
   QDateTime getFirstRecordingTime(const ProgressEntry &entry,int account) const;
   QString getSummaryText(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;
 
@@ -175,6 +184,8 @@ private:
   QList<ProgressEntry> m_progressEntries;
   QList<ProgressItem*> m_progressItems;
 
+  QRect m_windowGeometry                  = QRect(100,100,400,600);
+
   int m_nextId                            = 12345678;
 
   OperatingMode m_operatingMode           = DisplayRecordDay;
@@ -182,6 +193,7 @@ private:
   bool m_alwaysShowWork                   = false;
   int m_selectedAccounts                  = eAccountHomework | eAccountOfficeWork;
   int m_currentRecordingAccount           = 0;
+  int m_selectedWeeekdays                 = 0x1f;
 
   QVector<quint64> m_totalWorkSeconds     = { 0,0 };
   bool m_showSummariesInPercent           = false;
@@ -189,6 +201,9 @@ private:
   quint64 m_runningSeconds                = 0;
   bool m_dataChanged                      = false;
   qint64 m_lastElapsed                    = 0;
+
+  int m_recordedSeconds                   = 0;
+  int m_idleSinceSeconds                  = 0;
 };
 
 class ProgressItem : public QObject
@@ -201,6 +216,7 @@ class ProgressItem : public QObject
   Q_PROPERTY(int selectedAccount READ selectedAccount WRITE setSelectedAccount NOTIFY selectedAccountChanged)
   Q_PROPERTY(QDateTime timeStamp READ timeStamp WRITE setTimeStamp NOTIFY timeStampChanged)
   Q_PROPERTY(qint64 workInSeconds READ workInSeconds WRITE setWorkInSeconds NOTIFY workInSecondsChanged)
+  Q_PROPERTY(qint64 totalWorkInSeconds READ totalWorkInSeconds WRITE setTotalWorkInSeconds NOTIFY totalWorkInSecondsChanged)
   Q_PROPERTY(QString summary READ summary WRITE setSummary NOTIFY summaryChanged)
 
 public:
@@ -234,6 +250,9 @@ public:
   qint64 workInSeconds() const;
   void setWorkInSeconds(const qint64 seconds);
 
+  qint64 totalWorkInSeconds() const;
+  void setTotalWorkInSeconds(const qint64 seconds);
+
   QString summary() const;
   void setSummary(const QString &);
 
@@ -243,19 +262,21 @@ public:
   Q_SIGNAL void selectedAccountChanged();
   Q_SIGNAL void timeStampChanged();
   Q_SIGNAL void workInSecondsChanged();
+  Q_SIGNAL void totalWorkInSecondsChanged();
   Q_SIGNAL void summaryChanged();
 
 private:
-  int m_id                = 0;
-  int m_index             = 0;
-  QString m_projectName   = "";
-  QString m_description   = "";
-  bool m_isActive         = false;
-  int m_selectedAccount   = 0;
-  QDateTime m_timeStamp   = QDateTime::currentDateTime();
-  QDateTime m_recording   = QDateTime();
-  qint64 m_workInSeconds  = 0;
-  QString m_summaryText   = 0;
+  int m_id                    = 0;
+  int m_index                 = 0;
+  QString m_projectName       = "";
+  QString m_description       = "";
+  bool m_isActive             = false;
+  int m_selectedAccount       = 0;
+  QDateTime m_timeStamp       = QDateTime::currentDateTime();
+  QDateTime m_recording       = QDateTime();
+  qint64 m_workInSeconds      = 0;
+  qint64 m_totalWorkInSeconds = 0;
+  QString m_summaryText       = 0;
 };
 
 #endif // PROGRESSMODEL_H
