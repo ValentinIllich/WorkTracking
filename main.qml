@@ -65,6 +65,8 @@ ApplicationWindow {
     property int windowWidth: projectData.geometry.width
     property int windowHeight: projectData.geometry.height
 
+    property color textColor: Material.foreground
+
     id: window
     x: windowx
     y: windowy
@@ -204,8 +206,26 @@ ApplicationWindow {
         y: currentDate.height+8
         MenuItem {
             width: windowWidth // needed for language changes
+            Material.foreground: (projectData.currentRecordingAccount == 0) ? Material.accent : textColor
+            text: qsTr("Recording at home")
+            onTriggered: projectData.currentRecordingAccount = 0
+        }
+        MenuItem {
+            width: windowWidth // needed for language changes
+            Material.foreground: projectData.currentRecordingAccount == 1 ? Material.accent : textColor
+            text: qsTr("Recording in office")
+            onTriggered: projectData.currentRecordingAccount = 1
+        }
+        MenuSeparator {
+            width: windowWidth // needed for language changes
+        }
+        MenuItem {
+            width: windowWidth // needed for language changes
             text: qsTr("Show current day")
             onTriggered: jumpToDay(0,0,0)
+        }
+        MenuSeparator {
+            width: windowWidth // needed for language changes
         }
         RowLayout
         {
@@ -359,15 +379,6 @@ ApplicationWindow {
             checkable: true
             checked: projectData.alwaysShowWork
             onTriggered: projectData.alwaysShowWork = checked
-        }
-        ComboBox {
-            width: windowWidth // needed for language changes
-            enabled: projectData.mode==OperatingMode.DisplayRecordDay
-            onActivated: changeRecordingAccount(currentIndex)
-            Component.onCompleted: currentIndex = 0
-            model: {
-                [ qsTr("Recording at home"), qsTr("Recording in office") ]
-            }
         }
         MenuSeparator {
             width: windowWidth // needed for language changes (win10)
