@@ -590,27 +590,27 @@ void ProgressModel::workingTimer()
     }
   }
 
-//  if( isCurrnetIdle )
-//    m_idleSinceSeconds++;
-//  else if( m_recordedSeconds>0 && m_idleSinceSeconds>300 ) // only with home ???
-//  {
-//    // create an item for the rest
-//    QDateTime startOfRest = QDateTime::fromSecsSinceEpoch(elapsed-m_idleSinceSeconds);
-//    QDateTime endOfRest = startOfRest.addSecs(m_idleSinceSeconds);
+  if( isCurrnetIdle )
+    m_idleSinceSeconds++;
+  else if( m_recordedSeconds>0 && m_idleSinceSeconds>300 ) // only with home ???
+  {
+    // create an item for the rest
+    QDateTime startOfRest = QDateTime::fromSecsSinceEpoch(elapsed-m_idleSinceSeconds);
+    QDateTime endOfRest = startOfRest.addSecs(m_idleSinceSeconds);
 
-//    ProgressEntry item {m_nextId++,startOfRest,"-"
-//        ,startOfRest.time().toString("HH:mm")+"-"+endOfRest.time().toString("HH:mm")
-//        ,false,0,{0,0}};
-//    item.setWorkInSeconds(0,m_idleSinceSeconds);
-//    item.setItemCurrentAccount(0);
-//    m_progressEntries << item;
+    ProgressEntry item {m_nextId++,startOfRest,"----"
+        ,startOfRest.time().toString("HH:mm")+"-"+endOfRest.time().toString("HH:mm")
+        ,false,0,{0,0}};
+    item.setWorkInSeconds(m_currentRecordingAccount,m_idleSinceSeconds);
+    item.setItemCurrentAccount(0);
+    m_progressEntries << item;
 
-//    m_idleSinceSeconds = 0;
+    m_idleSinceSeconds = 0;
 
-//    updateItemsList();
-//  }
-//  else
-//    m_recordedSeconds++;
+    updateItemsList();
+  }
+  else
+    m_recordedSeconds++;
 
   m_runningSeconds++;
   if( (m_runningSeconds % 300) == 0)
