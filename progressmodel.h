@@ -17,6 +17,8 @@ public:
 
   int getId() const;
 
+  bool isRecreationItem() const;
+
   QDateTime getTimeStamp() const;
   void setTimeStamp(const QDateTime &);
 
@@ -66,6 +68,7 @@ class ProgressModel : public QObject
   Q_PROPERTY(QString title READ title NOTIFY titleChanged)
   Q_PROPERTY(bool isChangeable READ isChangeable NOTIFY isChangeableChanged)
   Q_PROPERTY(bool alwaysShowWork READ alwaysShowWork WRITE setAlwaysShowWork NOTIFY alwaysShowWorkChanged)
+  Q_PROPERTY(bool showBreakTimes READ showBreakTimes WRITE setShowBreakTimes NOTIFY showBreakTimesChanged)
   Q_PROPERTY(QQmlListProperty<ProgressItem> itemList READ itemList NOTIFY itemListChanged)
 
   Q_PROPERTY(bool showSumInPercent READ showSumInPercent NOTIFY showSumInPercentChanged)
@@ -111,6 +114,9 @@ public:
   bool alwaysShowWork() const;
   void setAlwaysShowWork(const bool &);
 
+  bool showBreakTimes() const;
+  void setShowBreakTimes(const bool &);
+
   QQmlListProperty<ProgressItem> itemList();
 
   bool showSumInPercent() const;
@@ -132,6 +138,7 @@ public:
   Q_SIGNAL void titleChanged();
   Q_SIGNAL void isChangeableChanged();
   Q_SIGNAL void alwaysShowWorkChanged();
+  Q_SIGNAL void showBreakTimesChanged();
   Q_SIGNAL void itemListChanged();
   Q_SIGNAL void showSumInPercentChanged();
   Q_SIGNAL void totalTimeChanged();
@@ -184,6 +191,8 @@ private:
   QList<ProgressEntry> m_progressEntries;
   QList<ProgressItem*> m_progressItems;
 
+  QMap<int, QList<ProgressEntry> > m_recreationEntries;
+
   QRect m_windowGeometry                  = QRect(100,100,400,600);
 
   int m_nextId                            = 12345678;
@@ -191,6 +200,7 @@ private:
   OperatingMode m_operatingMode           = DisplayRecordDay;
   bool m_isChangeable                     = true;
   bool m_alwaysShowWork                   = false;
+  bool m_showBreakTimes                   = false;
   int m_selectedAccounts                  = eAccountHomework | eAccountOfficeWork;
   int m_currentRecordingAccount           = 0;
   int m_selectedWeeekdays                 = 0x1f;

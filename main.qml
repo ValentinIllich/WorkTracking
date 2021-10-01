@@ -380,6 +380,14 @@ ApplicationWindow {
             checked: projectData.alwaysShowWork
             onTriggered: projectData.alwaysShowWork = checked
         }
+        MenuItem {
+            id: showbreaks
+            width: windowWidth // needed for language changes (win10)
+            text: qsTr("show break times")
+            checkable: true
+            checked: projectData.showBreakTimes
+            onTriggered: projectData.showBreakTimes = checked
+        }
         MenuSeparator {
             width: windowWidth // needed for language changes (win10)
         }

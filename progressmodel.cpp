@@ -94,6 +94,16 @@ int ProgressEntry::getId() const
   return m_id;
 }
 
+bool ProgressEntry::isRecreationItem() const
+{
+  if( m_description.length()<9 )
+    return false;
+  if( m_description[2]==':' && m_description[5]=='-' && m_description[8]==':' )
+    return true;
+  else
+    return false;
+}
+
 QDateTime ProgressEntry::getTimeStamp() const
 {
   return m_timeStamp;
@@ -132,6 +142,13 @@ QString ProgressEntry::getItemDescription() const
 void ProgressEntry::setItemDescription(const QString &descr)
 {
   m_description = descr;
+  if( isRecreationItem() )
+  {
+    QTime startTime = QTime::fromString(descr.left(5));
+    QTime endTime = QTime::fromString(descr.mid(6,5));
+    m_timeStamp = QDateTime(m_timeStamp.date(),startTime);
+    m_workInSeconds[m_account] = startTime.secsTo(endTime);
+  }
 }
 
 bool ProgressEntry::getItemActive() const
@@ -206,6 +223,11 @@ void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const qint64 &work)
     current = 0;
 
   m_workInSeconds[typeOfWork] = current;
+  if( isRecreationItem() )
+  {
+    QTime startTime = getTimeStamp().time();
+    m_description = startTime.toString("HH:mm")+"-"+startTime.addSecs(current).toString("HH:mm");
+  }
 }
 
 static QMap<ProgressModel::StorageType,QString> m_storageFile =
@@ -365,8 +387,32 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       // list of interruptions for the day
       QList<quint64> workingBlockLengths;
       QList<quint64> workingBlocksInterrupt;
-      workingBlockLengths << 5*3600;
-      workingBlocksInterrupt << 45*60;
+      if( m_recreationEntries.contains(dayofweek) )
+      {
+        // ..........|..........................|---|...................................|------|..............|............
+        //           first recording            recr1                                   recr2                 last recording
+        //           +++++++++++++++++++++++++++     +++++++++++++++++++++++++++++++++++        +++++++++++++++
+        //           work block 1                    work block 2                               work block 3
+        for( const auto &entry : qAsConst(m_recreationEntries[dayofweek]) )
+        {
+          QDateTime firstrecordingOfDay = startDateTime;
+          qDebug("++++ found recreation at %s with %d seconds",entry.getTimeStamp().toString().toLatin1().data(),getSummaryWorkInSeconds(entry));
+          qint64 workblocklen = entry.getTimeStamp().toSecsSinceEpoch() - firstrecordingOfDay.toSecsSinceEpoch(); // todo office?
+          qint64 recreationlen = getSummaryWorkInSeconds(entry);
+          //firstrecordingOfDay
+          qDebug("++++ next working block with %d seconds, interrupt %d",workblocklen,recreationlen);
+          workingBlockLengths << workblocklen;
+          workingBlocksInterrupt << recreationlen;
+
+          qint64 nextbegin = firstrecordingOfDay.toSecsSinceEpoch() + workblocklen + recreationlen;
+          startDateTime.setSecsSinceEpoch(nextbegin);
+        }
+      }
+      else
+      {
+        workingBlockLengths << 5*3600;
+        workingBlocksInterrupt << 45*60;
+      }
       //
       if( timespent>0 )
       {
@@ -456,6 +502,18 @@ void ProgressModel::setAlwaysShowWork(const bool &alwaysWork)
   emit alwaysShowWorkChanged();
 }
 
+bool ProgressModel::showBreakTimes() const
+{
+  return m_showBreakTimes;
+}
+
+void ProgressModel::setShowBreakTimes(const bool &show)
+{
+  m_showBreakTimes = show;
+  updateItemsList();
+  emit showBreakTimesChanged();
+}
+
 QQmlListProperty<ProgressItem> ProgressModel::itemList()
 {
   return QQmlListProperty<ProgressItem>(this, m_progressItems);
@@ -505,6 +563,8 @@ QString ProgressModel::totalTime() const
     {
       for( int j=0; j<m_progressItems.size(); j++ )
       {
+        if( m_progressEntries[i].isRecreationItem() )
+          continue;
         if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
           summary.addAllWorkInSeconds(m_progressEntries[i].getAllWorkInSeconds());
       }
@@ -512,7 +572,7 @@ QString ProgressModel::totalTime() const
     break;
   }
 
-  return getSummaryText(summary,QVector<quint64>({0,0}));
+  return getSummaryText(summary,QVector<quint64>({0,0})); // todo m_totalWorkSeconds
 }
 
 void ProgressModel::itemStateChanged()
@@ -592,16 +652,15 @@ void ProgressModel::workingTimer()
 
   if( isCurrnetIdle )
     m_idleSinceSeconds++;
-  else if( m_recordedSeconds>0 && m_idleSinceSeconds>300 ) // only with home ???
+  else if( m_recordedSeconds>0 && m_idleSinceSeconds>300 ) // todo only with home ???
   {
     // create an item for the rest
     QDateTime startOfRest = QDateTime::fromSecsSinceEpoch(elapsed-m_idleSinceSeconds);
     QDateTime endOfRest = startOfRest.addSecs(m_idleSinceSeconds);
 
-    ProgressEntry item {m_nextId++,startOfRest,"----"
-        ,startOfRest.time().toString("HH:mm")+"-"+endOfRest.time().toString("HH:mm")
-        ,false,0,{0,0}};
-    item.setWorkInSeconds(m_currentRecordingAccount,m_idleSinceSeconds);
+    ProgressEntry item {m_nextId++,startOfRest,"","",false,0,{0,0}};
+    item.setItemDescription(startOfRest.time().toString("HH:mm")+"-"+endOfRest.time().toString("HH:mm"));
+    //item.setWorkInSeconds(m_currentRecordingAccount,m_idleSinceSeconds);
     item.setItemCurrentAccount(0);
     m_progressEntries << item;
 
@@ -753,6 +812,8 @@ void ProgressModel::addSeconds(const int &index, const int &diff)
       m_dataChanged = true;
       item->addWorkInSeconds(m_progressItems.at(index)->selectedAccount(),diff);
       m_progressItems.at(index)->setSummary(getSummaryText(*item,QVector<quint64>({0,0})));
+      if( item->isRecreationItem() )
+        m_progressItems.at(index)->setDescription(item->getItemDescription());
     }
     ++item;
   }
@@ -830,6 +891,7 @@ void ProgressModel::setQmlEngine(QQmlApplicationEngine &engine)
 void ProgressModel::updateItemsList()
 {
   m_progressItems.clear();
+  m_recreationEntries.clear();
 
   QMap<QString,ProgressEntry> projectsMap;
   QMap<int,ProgressEntry> monthsMap;
@@ -845,6 +907,8 @@ void ProgressModel::updateItemsList()
     {
     case DisplayYear:
       if( item.getTimeStamp().date().year()!=m_actualDate.date().year() )
+        continue;
+      if( item.isRecreationItem() )
         continue;
       if( m_alwaysShowWork )
       {
@@ -862,6 +926,8 @@ void ProgressModel::updateItemsList()
     case DisplayMonth:
       if( item.getTimeStamp().date().month()!=m_actualDate.date().month() )
         continue;
+      if( item.isRecreationItem() )
+        continue;
       if( !projectsMap.contains(item.getItemName()) )
         projectsMap[item.getItemName()] = ProgressEntry{0,item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
       projectsMap[item.getItemName()].addAllWorkInSeconds(item.getAllWorkInSeconds());
@@ -869,6 +935,12 @@ void ProgressModel::updateItemsList()
     case DisplayWeek:
       if( item.getTimeStamp().date().weekNumber()!=m_actualDate.date().weekNumber())
         continue;
+      if( item.isRecreationItem() )
+      {
+        qDebug("++++ remembering recreation at %s with %d seconds",item.getTimeStamp().toString().toLatin1().data(),getSummaryWorkInSeconds(item));
+        m_recreationEntries[item.getTimeStamp().date().dayOfWeek()-1] << item;
+        continue;
+      }
       if( m_alwaysShowWork )
       {
         if( !projectsMap.contains(item.getItemName()) )
@@ -880,7 +952,7 @@ void ProgressModel::updateItemsList()
         if( !weekDayMap.contains(item.getTimeStamp().date().dayOfWeek()) )
         {
           weekDayMap[item.getTimeStamp().date().dayOfWeek()] = ProgressEntry{0, item.getTimeStamp(), item.getItemName(),item.getItemDescription(),false,0,{0,0}};
-          weekDayMap[item.getTimeStamp().date().dayOfWeek()].setRecordingStart(0,QDateTime());
+          weekDayMap[item.getTimeStamp().date().dayOfWeek()].setRecordingStart(0,QDateTime()); // todo office?
         }
         weekDayMap[item.getTimeStamp().date().dayOfWeek()].addAllWorkInSeconds(item.getAllWorkInSeconds());
         QDateTime firstRecordingSummary = weekDayMap[item.getTimeStamp().date().dayOfWeek()].getRecordingStart(0);
@@ -888,11 +960,13 @@ void ProgressModel::updateItemsList()
         if( firstRecordingItem.isValid() )
         {
           if( !firstRecordingSummary.isValid() || firstRecordingItem<firstRecordingSummary )
-            weekDayMap[item.getTimeStamp().date().dayOfWeek()].setRecordingStart(0,firstRecordingItem);
+            weekDayMap[item.getTimeStamp().date().dayOfWeek()].setRecordingStart(0,firstRecordingItem);// todo office?
         }
       }
       break;
     case DisplayRecordDay:
+      if( !m_showBreakTimes && item.isRecreationItem() )
+        continue;
       if( item.getTimeStamp().date()!=m_actualDate.date() )
         continue;
       dayList << ProgressEntry(item.getId(),item.getTimeStamp(), item.getItemName(),item.getItemDescription(),item.getItemActive(),item.getItemCurrentAccount(),item.getAllWorkInSeconds());
@@ -955,7 +1029,7 @@ void ProgressModel::updateItemsList()
         entry->setId(item.getId());
         entry->setProjectName(humanReadableWeekDay(day) + "\t" + humanReadableDate(item.getTimeStamp()));
         entry->setTimeStamp(item.getTimeStamp());
-        entry->setRecordingStart(item.getRecordingStart(0));
+        entry->setRecordingStart(item.getRecordingStart(0)); // todo office?
         entry->setWorkInSeconds(getSummaryWorkInSeconds(item));
         entry->setTotalWorkInSeconds(getSummaryWorkInSeconds(item,true));
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
@@ -1002,7 +1076,7 @@ quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry,bool g
   if( getTotalSummary )
   {
     value += entry.getWorkInSeconds(0);
-    value += entry.getWorkInSeconds(0);
+    value += entry.getWorkInSeconds(1);
   }
   else
   {
@@ -1060,7 +1134,9 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
     infotext = showinPercent ? QString::asprintf(clipboardFormat ? "%1.3f" : "%.1f %%",percent) : QString::asprintf("%02d:%02d",hours,minutes);
     break;
   case DisplayRecordDay:
-    if( entry.getItemActive() )
+    if( entry.isRecreationItem() )
+      infotext = "--:--";
+    else if( entry.getItemActive() )
       infotext = QString::asprintf("%02d:%02d:%02d",hours,minutes,seconds);
     else
       infotext = QString::asprintf("%02d:%02d",hours,minutes);
