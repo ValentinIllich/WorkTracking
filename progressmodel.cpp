@@ -323,6 +323,7 @@ void ProgressModel::setMode(const ProgressModel::OperatingMode &mode)
   emit titleChanged();
   emit totalTimeChanged();
   emit modeChanged();
+  emit showExportDaysChanged();
 }
 
 int ProgressModel::currentRecordingAccount()
@@ -373,7 +374,7 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       timespent += 150; // round in range of 5 minutes
       timespent = (timespent / 300) * 300;
 
-      qDebug("+++ creation of %s is %s",item->projectName().toLatin1().data(),item->timeStamp().toString().toLatin1().data());
+      qDebug() << "+++ creation of" << item->projectName() << "is" << item->timeStamp().toString();
       QDateTime startDateTime = item->getRecordingStart();
       if( !startDateTime.isValid() )
         startDateTime = item->timeStamp();
@@ -396,11 +397,11 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
         for( const auto &entry : qAsConst(m_recreationEntries[dayofweek]) )
         {
           QDateTime firstrecordingOfDay = startDateTime;
-          qDebug("++++ found recreation at %s with %d seconds",entry.getTimeStamp().toString().toLatin1().data(),getSummaryWorkInSeconds(entry));
+          qDebug() << "++++ found recreation at" << entry.getTimeStamp().toString() << "with" << getSummaryWorkInSeconds(entry) << "seconds";
           qint64 workblocklen = entry.getTimeStamp().toSecsSinceEpoch() - firstrecordingOfDay.toSecsSinceEpoch(); // todo office?
           qint64 recreationlen = getSummaryWorkInSeconds(entry);
           //firstrecordingOfDay
-          qDebug("++++ next working block with %d seconds, interrupt %d",workblocklen,recreationlen);
+          qDebug() << "++++ next working block with" << workblocklen << "seconds, interrupt" << recreationlen;
           workingBlockLengths << workblocklen;
           workingBlocksInterrupt << recreationlen;
 
@@ -500,6 +501,7 @@ void ProgressModel::setAlwaysShowWork(const bool &alwaysWork)
   m_alwaysShowWork = alwaysWork;
   updateItemsList();
   emit alwaysShowWorkChanged();
+  emit showExportDaysChanged();
 }
 
 bool ProgressModel::showBreakTimes() const
@@ -545,6 +547,11 @@ void ProgressModel::changeLanguage(int language)
     QCoreApplication::installTranslator(&translator);
 }
 
+bool ProgressModel::showExportDays()
+{
+  return !m_alwaysShowWork && !m_showSummariesInPercent && m_operatingMode==DisplayWeek;
+}
+
 QString ProgressModel::totalTime() const
 {
   ProgressEntry summary;
@@ -583,7 +590,13 @@ void ProgressModel::itemStateChanged()
     if( m_progressEntries[i].getId()==item->getId() )
     {
       m_dataChanged = true;
-      m_progressEntries[i].setItemActive(item->isActive());
+      if( m_currentRecordingAccount>=0 )
+        m_progressEntries[i].setItemActive(item->isActive());
+      else if( item->isActive() )
+      {
+        item->setIsActive(false);
+        emit recordingDisabled();
+      }
       item->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
     }
   }
@@ -651,7 +664,10 @@ void ProgressModel::workingTimer()
   }
 
   if( isCurrnetIdle )
+  {
     m_idleSinceSeconds++;
+    if( m_idleSinceSeconds>=300 ) m_currentRecordingAccount = -1;
+  }
   else if( m_recordedSeconds>0 && m_idleSinceSeconds>300 ) // todo only with home ???
   {
     // create an item for the rest
@@ -734,7 +750,7 @@ void ProgressModel::next()
 
 void ProgressModel::jumpToDay(const int &day, const int &month, const int &year)
 {
-  qDebug("%d/%d/%d",day,month,year);
+  qDebug() << day << "/" << month << "/" << year;
 
   m_actualDate = QDateTime::currentDateTime();
   QDate actualdate = m_actualDate.date();
@@ -761,6 +777,7 @@ void ProgressModel::changeSummary()
   m_showSummariesInPercent = !m_showSummariesInPercent;
   updateItemsList();
   emit showSumInPercentChanged();
+  emit showExportDaysChanged();
 }
 
 QString ProgressModel::getItemTitle(ProgressItem *item)
@@ -801,7 +818,6 @@ void ProgressModel::remove(const int &index)
 
 void ProgressModel::addSeconds(const int &index, const int &diff)
 {
-  qDebug("addseconds");
   int id = m_progressItems.at(index)->getId();
 
   QList<ProgressEntry>::iterator item = m_progressEntries.begin();
@@ -937,7 +953,7 @@ void ProgressModel::updateItemsList()
         continue;
       if( item.isRecreationItem() )
       {
-        qDebug("++++ remembering recreation at %s with %d seconds",item.getTimeStamp().toString().toLatin1().data(),getSummaryWorkInSeconds(item));
+        qDebug() << "++++ remembering recreation at" << item.getTimeStamp().toString() << "with" << getSummaryWorkInSeconds(item) << "seconds";
         m_recreationEntries[item.getTimeStamp().date().dayOfWeek()-1] << item;
         continue;
       }

@@ -53,8 +53,8 @@ import QtQuick.Controls 2.4
 import QtQuick.Controls.Material 2.4
 import QtQuick.Layouts 1.11
 import QtQuick.Window 2.11
+import QtQuick.Dialogs 1.1
 import Qt.labs.settings 1.0
-import QtQuick.Dialogs 1.0
 import Qt.labs.calendar 1.0
 
 import ProjectsData 1.0
@@ -82,6 +82,7 @@ ApplicationWindow {
 
     ProgressModel {
         id: projectData
+        onRecordingDisabled: jumpmenu.open()
     }
 
     RoundButton {
@@ -414,40 +415,41 @@ ApplicationWindow {
                 //anchors.fill: parent
                 Label {
                     text: qsTr("copy to clipboard...")
-                    visible: !projectData.showSumInPercent
                 }
                 RowLayout {
-                    visible: !projectData.showSumInPercent
+                    visible: projectData.showExportDays
                     Label {
                         text: qsTr("including recreation time of")
-                        visible: !projectData.showSumInPercent
+                        visible: projectData.showExportDays
                     }
                     TextField {
                       id: additionalminutes
                       placeholderText: qsTr("minutes of rest")
-                      visible: !projectData.showSumInPercent
+                      visible: projectData.showExportDays
                       cursorVisible: true
                       text: ""
                     }
                 }
                 RowLayout {
-                    visible: !projectData.showSumInPercent
+                    visible: projectData.showExportDays
                     Label {
                         text: qsTr("beginning after")
-                        visible: !projectData.showSumInPercent
+                        visible: projectData.showExportDays
                     }
                     TextField {
                       id: thresholdofrest
                       placeholderText: qsTr("hours")
-                      visible: !projectData.showSumInPercent
+                      visible: projectData.showExportDays
                       cursorVisible: true
                       text: ""
                     }
                 }
                 RowLayout
                 {
+                    visible: projectData.showExportDays
                     RoundButton {
                         text: qsTr("Mo")
+                        visible: projectData.showExportDays
                         checked: projectData.getWeekdaySelected(0)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
@@ -455,6 +457,7 @@ ApplicationWindow {
                     }
                     RoundButton {
                         text: qsTr("Tu")
+                        visible: projectData.showExportDays
                         checked: projectData.getWeekdaySelected(1)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
@@ -462,6 +465,7 @@ ApplicationWindow {
                     }
                     RoundButton {
                         text: qsTr("We")
+                        visible: projectData.showExportDays
                         checked: projectData.getWeekdaySelected(2)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
@@ -469,6 +473,7 @@ ApplicationWindow {
                     }
                     RoundButton {
                         text: qsTr("Th")
+                        visible: projectData.showExportDays
                         checked: projectData.getWeekdaySelected(3)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
@@ -476,29 +481,30 @@ ApplicationWindow {
                     }
                     RoundButton {
                         text: qsTr("Fr")
+                        visible: projectData.showExportDays
                         checked: projectData.getWeekdaySelected(4)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
                         onToggled: projectData.setWeekdaySelected(4,checked)
                     }
                 }
-                RowLayout
-                {
-                    RoundButton {
-                        text: qsTr("Sa")
-                        checked: projectData.getWeekdaySelected(5)
-                        checkable: true
-                        Material.background: checked ? Material.accent : "transparent"
-                        onToggled: projectData.setWeekdaySelected(5,checked)
-                    }
-                    RoundButton {
-                        text: qsTr("Su")
-                        checked: projectData.getWeekdaySelected(6)
-                        checkable: true
-                        Material.background: checked ? Material.accent : "transparent"
-                        onToggled: projectData.setWeekdaySelected(6,checked)
-                    }
-                }
+//                RowLayout
+//                {
+//                    RoundButton {
+//                        text: qsTr("Sa")
+//                        checked: projectData.getWeekdaySelected(5)
+//                        checkable: true
+//                        Material.background: checked ? Material.accent : "transparent"
+//                        onToggled: projectData.setWeekdaySelected(5,checked)
+//                    }
+//                    RoundButton {
+//                        text: qsTr("Su")
+//                        checked: projectData.getWeekdaySelected(6)
+//                        checkable: true
+//                        Material.background: checked ? Material.accent : "transparent"
+//                        onToggled: projectData.setWeekdaySelected(6,checked)
+//                    }
+//                }
                 RowLayout {
                     Button {
                       text: qsTr("Cancel")

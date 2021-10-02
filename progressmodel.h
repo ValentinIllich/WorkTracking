@@ -72,6 +72,7 @@ class ProgressModel : public QObject
   Q_PROPERTY(QQmlListProperty<ProgressItem> itemList READ itemList NOTIFY itemListChanged)
 
   Q_PROPERTY(bool showSumInPercent READ showSumInPercent NOTIFY showSumInPercentChanged)
+  Q_PROPERTY(bool showExportDays READ showExportDays NOTIFY showExportDaysChanged)
   Q_PROPERTY(QString totalTime READ totalTime NOTIFY totalTimeChanged)
 
 public:
@@ -122,6 +123,7 @@ public:
   bool showSumInPercent() const;
   void changeLanguage(int language);
 
+  bool showExportDays();
   QString totalTime() const;
 
   Q_SLOT void itemStateChanged();
@@ -141,9 +143,11 @@ public:
   Q_SIGNAL void showBreakTimesChanged();
   Q_SIGNAL void itemListChanged();
   Q_SIGNAL void showSumInPercentChanged();
+  Q_SIGNAL void showExportDaysChanged();
   Q_SIGNAL void totalTimeChanged();
 
   Q_SIGNAL void languageChanged();
+  Q_SIGNAL void recordingDisabled();
 
   Q_INVOKABLE void previous();
   Q_INVOKABLE void next();
@@ -202,7 +206,7 @@ private:
   bool m_alwaysShowWork                   = false;
   bool m_showBreakTimes                   = false;
   int m_selectedAccounts                  = eAccountHomework | eAccountOfficeWork;
-  int m_currentRecordingAccount           = 0;
+  int m_currentRecordingAccount           = -1;
   int m_selectedWeeekdays                 = 0x1f;
 
   QVector<quint64> m_totalWorkSeconds     = { 0,0 };
