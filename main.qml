@@ -73,7 +73,7 @@ ApplicationWindow {
     width: windowWidth
     height: windowHeight
     visible: true
-    title: qsTr("Project Work")
+    title: qsTr("Project Work ") + projectData.getProgramVersion()
 
     onXChanged: projectData.geometry = Qt.rect(x, y, width, height)
     onYChanged: projectData.geometry = Qt.rect(x, y, width, height)
@@ -315,21 +315,25 @@ ApplicationWindow {
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of year")
+            Material.foreground: projectData.mode == 0 ? Material.accent : textColor
             onTriggered: projectData.mode = OperatingMode.DisplayYear
         }
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of month")
+            Material.foreground: projectData.mode == 1 ? Material.accent : textColor
             onTriggered: projectData.mode = OperatingMode.DisplayMonth
         }
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of week")
+            Material.foreground: projectData.mode == 2 ? Material.accent : textColor
             onTriggered: projectData.mode = OperatingMode.DisplayWeek
         }
         MenuItem {
             width: windowWidth // needed for language changes (win10)
             text: qsTr("Overview of day")
+            Material.foreground: projectData.mode == 3 ? Material.accent : textColor
             onTriggered: projectData.mode = OperatingMode.DisplayRecordDay
         }
         MenuSeparator {

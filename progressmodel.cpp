@@ -1,5 +1,6 @@
 #include "progressmodel.h"
 #include "../backup/Utilities.h"
+#include "ressources/version.inc"
 
 QQmlEngine *m_qmlEngine;
 
@@ -200,14 +201,14 @@ void ProgressEntry::setWorkInSeconds(const int &typeOfWork,const quint64 &work)
 void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const qint64 &work)
 {
   while (m_workInSeconds.size()<typeOfWork) m_workInSeconds.push_back(0);
-
-  if( m_workInSeconds[typeOfWork]==0 )
-    m_recordingStart[typeOfWork] = QDateTime::currentDateTime();
+  QDateTime currentTime = QDateTime::currentDateTime();
 
   if( work>0 )
   {
-    QDateTime currentTime = QDateTime::currentDateTime();
-    QTime firstRecordTime = currentTime.time().addSecs(-work);
+    if( m_workInSeconds[typeOfWork]==0 )
+      m_recordingStart[typeOfWork] = currentTime;
+
+    QTime firstRecordTime = currentTime.time().addSecs(-m_workInSeconds[typeOfWork] - work);
     if( m_recordingStart[typeOfWork].isValid() )
     {
       if( m_recordingStart[typeOfWork].time()>=firstRecordTime )
@@ -249,7 +250,8 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 {
   connect(this,SIGNAL(languageChanged()),m_qmlEngine,SLOT(retranslate()));
 
-  QSettings settings("VISolutions","project-tracker");
+  QString inifile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/settings.ini";
+  QSettings settings(inifile,QSettings::IniFormat);
   if( settings.contains("language-id") )
     changeLanguage(settings.value("window-geometry").toInt());
   if( settings.contains("window-geometry") )
@@ -296,7 +298,8 @@ ProgressModel::~ProgressModel()
   if( m_dataChanged )
     saveData(getStorageBaseFileName(DataStorage), false);
 
-  QSettings settings("VISolutions","project-tracker");
+  QString inifile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/settings.ini";
+  QSettings settings(inifile,QSettings::IniFormat);
   settings.setValue("window-geometry",m_windowGeometry);
 }
 
@@ -409,9 +412,9 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
           startDateTime.setSecsSinceEpoch(nextbegin);
         }
       }
-      else
+      else if( getWeekdaySelected(dayofweek) )
       {
-        workingBlockLengths << 5*3600;
+        workingBlockLengths << 4*3600;
         workingBlocksInterrupt << 45*60;
       }
       //
@@ -698,6 +701,11 @@ void ProgressModel::workingTimer()
   }
 
   emit totalTimeChanged();
+}
+
+QString ProgressModel::getProgramVersion()
+{
+  return TRACKING_STR_VERSION;
 }
 
 void ProgressModel::previous()

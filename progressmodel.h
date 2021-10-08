@@ -149,6 +149,8 @@ public:
   Q_SIGNAL void languageChanged();
   Q_SIGNAL void recordingDisabled();
 
+  Q_INVOKABLE QString getProgramVersion();
+
   Q_INVOKABLE void previous();
   Q_INVOKABLE void next();
   Q_INVOKABLE void jumpToDay(const int &day,const int &month,const int &year);
