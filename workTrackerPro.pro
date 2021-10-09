@@ -34,3 +34,6 @@ OTHER_FILES += \
     ressources/workTracking.rc \
     ressources/Info_mac.plist \
     ressources/version.inc
+
+DISTFILES += \
+  README.md
