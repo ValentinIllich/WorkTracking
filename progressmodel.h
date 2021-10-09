@@ -220,6 +220,7 @@ private:
 
   int m_recordedSeconds                   = 0;
   int m_idleSinceSeconds                  = 0;
+  int m_recordingRequestedItem            = -1;
 };
 
 class ProgressItem : public QObject

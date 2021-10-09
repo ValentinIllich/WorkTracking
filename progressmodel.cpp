@@ -338,6 +338,13 @@ void ProgressModel::setCurrentRecordingAccount(const int &account)
 {
   m_currentRecordingAccount = account;
   emit currentRecordingAccountChanged();
+
+  for( const auto item : qAsConst(m_progressItems) )
+  {
+    item->setSelectedAccount(account);
+    if( m_recordingRequestedItem>=0 && item->getId()==m_recordingRequestedItem )
+      item->setIsActive(true);
+  }
 }
 
 void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QString &thresholdHours)
@@ -593,14 +600,17 @@ void ProgressModel::itemStateChanged()
     if( m_progressEntries[i].getId()==item->getId() )
     {
       m_dataChanged = true;
-      if( m_currentRecordingAccount>=0 )
-        m_progressEntries[i].setItemActive(item->isActive());
-      else if( item->isActive() )
-      {
-        item->setIsActive(false);
-        emit recordingDisabled();
-      }
+      m_progressEntries[i].setItemActive(item->isActive());
       item->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
+      if( item->isActive() )
+      {
+        m_recordingRequestedItem = item->getId();
+        if( m_currentRecordingAccount==-1 )
+        {
+          item->setIsActive(false);
+          emit recordingDisabled();
+        }
+      }
     }
   }
 }
@@ -666,14 +676,27 @@ void ProgressModel::workingTimer()
     }
   }
 
-  if( isCurrnetIdle )
+  if( m_recordingRequestedItem>=0 && m_currentRecordingAccount>=0 )
+  {
+    for( const auto item : qAsConst(m_progressItems) )
+    {
+      if( item->getId()!=m_recordingRequestedItem )
+        item->setIsActive(false);
+    }
+    m_recordingRequestedItem = -1;
+  }
+  else if( isCurrnetIdle )
   {
     m_idleSinceSeconds++;
-    if( m_idleSinceSeconds>=300 ) m_currentRecordingAccount = -1;
+    if( m_idleSinceSeconds>=300 && m_currentRecordingAccount>=0 )
+    {
+      m_currentRecordingAccount = -1;
+      emit currentRecordingAccountChanged();
+    }
   }
   else if( m_recordedSeconds>0 && m_idleSinceSeconds>300 ) // todo only with home ???
   {
-    // create an item for the rest
+    // create an item for the break
     QDateTime startOfRest = QDateTime::fromSecsSinceEpoch(elapsed-m_idleSinceSeconds);
     QDateTime endOfRest = startOfRest.addSecs(m_idleSinceSeconds);
 

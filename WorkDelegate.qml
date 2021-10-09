@@ -163,7 +163,7 @@ ItemDelegate {
             Layout.fillWidth: true
             visible: root.checked && projectData.isChangeable
             onActivated: accountChanged(currentIndex)
-            Component.onCompleted: currentIndex = currentAccount()
+            currentIndex: currentAccount()
             model: {
                 [ qsTr("time correction for home"), qsTr("time correction for office") ]
             }
