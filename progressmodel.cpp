@@ -372,18 +372,6 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       quint64 totalSpent = item->totalWorkInSeconds();
       bool includingRecreation = false;
 
-      if( getWeekdaySelected(dayofweek) )
-      {
-        if( threashold>0 && totalSpent>(threashold*3600) )
-        {
-          timespent += additional*60;
-          includingRecreation = true;
-        }
-      }
-
-      timespent += 150; // round in range of 5 minutes
-      timespent = (timespent / 300) * 300;
-
       qDebug() << "+++ creation of" << item->projectName() << "is" << item->timeStamp().toString();
       QDateTime startDateTime = item->getRecordingStart();
       if( !startDateTime.isValid() )
@@ -394,6 +382,7 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       int MM = (startTime.minute()/5)*5;
 
       startTime.setHMS(HH,MM,0);
+      startDateTime.setTime((startTime));
 
       // list of interruptions for the day
       QList<quint64> workingBlockLengths;
@@ -410,7 +399,12 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
           qDebug() << "++++ found recreation at" << entry.getTimeStamp().toString() << "with" << getSummaryWorkInSeconds(entry) << "seconds";
           qint64 workblocklen = entry.getTimeStamp().toSecsSinceEpoch() - firstrecordingOfDay.toSecsSinceEpoch(); // todo office?
           qint64 recreationlen = getSummaryWorkInSeconds(entry);
-          //firstrecordingOfDay
+
+          workblocklen += 150;
+          workblocklen = (workblocklen / 300) * 300;
+          recreationlen += 150;
+          recreationlen = (recreationlen / 300) * 300;
+
           qDebug() << "++++ next working block with" << workblocklen << "seconds, interrupt" << recreationlen;
           workingBlockLengths << workblocklen;
           workingBlocksInterrupt << recreationlen;
@@ -427,6 +421,17 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       //
       if( timespent>0 )
       {
+        if( getWeekdaySelected(dayofweek) )
+        {
+          if( threashold>0 && totalSpent>(threashold*3600) )
+          {
+            timespent += additional*60;
+            includingRecreation = true;
+          }
+        }
+        timespent += 150; // round in range of 5 minutes
+        timespent = (timespent / 300) * 300;
+
         quint64 nextBlockLen = workingBlockLengths.takeFirst();
         quint64 nextInterruptLen = workingBlocksInterrupt.takeFirst();
 
@@ -824,7 +829,11 @@ void ProgressModel::append(const QString &name, const QString &description, cons
 
   item.setWorkInSeconds(account,spentSeconds);
   item.setItemCurrentAccount(account);
+  m_recordingRequestedItem = item.getId();
   m_progressEntries << item;
+
+  if( m_currentRecordingAccount==-1 )
+    m_currentRecordingAccount = account;
 
   updateItemsList();
   emit totalTimeChanged();
