@@ -253,7 +253,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
   QString inifile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/settings.ini";
   QSettings settings(inifile,QSettings::IniFormat);
   if( settings.contains("language-id") )
-    changeLanguage(settings.value("window-geometry").toInt());
+    changeLanguage(settings.value("language-id").toInt());
   if( settings.contains("window-geometry") )
     m_windowGeometry = settings.value("window-geometry").toRect();
 
@@ -494,7 +494,7 @@ QString ProgressModel::title()
     return tr("week") +" " + QString::number(m_actualDate.date().weekNumber()) + " " + tr("of year");
     break;
   case DisplayRecordDay:
-    return humanReadableWeekDay(m_actualDate.date().dayOfWeek()-1) + m_actualDate.toString(" dd-MM-yyyy");
+    return humanReadableWeekDay(m_actualDate.date().dayOfWeek()-1) + " " + humanReadableDate(m_actualDate);
     break;
   }
 
@@ -879,7 +879,8 @@ void ProgressModel::addSeconds(const int &index, const int &diff)
 
 void ProgressModel::setLanguage(const int &lang)
 {
-  QSettings settings("VISolutions","project-tracker");
+  QString inifile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/settings.ini";
+  QSettings settings(inifile,QSettings::IniFormat);
 
   changeLanguage(lang);
   settings.setValue("language-id",lang);
