@@ -13,7 +13,7 @@ The main features are:
 Extended features:
 
 - automatic tracking of breaks during recording (more than 5 minutes)
-- export of spent times per day / week / month /year into clipboard (EXCel format)
+- export of spent times per day / week / month / year into clipboard (EXCel format)
 - ability of an optional automatic addition of break times if work exceeds a certain limit
 
 
@@ -23,6 +23,16 @@ Extended features:
 
 ## Version History
 
+### Version 2.1.3 (20.11.2021)
+
+#### New features
+
+#### Fixed problems
+- fixed persistency of language setting
+- fixed non unique date format across menu and weekly work overview (was missing translation)
+
+
+-------------------------
 ### Version 2.1.2 (9.10.2021)
 
 #### New features
