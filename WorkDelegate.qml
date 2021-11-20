@@ -134,7 +134,7 @@ ItemDelegate {
                     id: timeLabel
                     font.pixelSize: Qt.application.font.pixelSize * 2
                     text: itemTitle(model.projectName,model.summary)
-                    color: model.isActive ? "lightgreen" : "white"
+                    color: model.isActive ? Material.accent : Material.foreground
                 }
                 Label {
                     id: projectAbout
