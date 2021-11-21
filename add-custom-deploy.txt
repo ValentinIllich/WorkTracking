@@ -1,3 +1,7 @@
 Command: %{Qt:QT_INSTALL_BINS}\windeployqt.exe
 Arguments: --qmldir %{CurrentProject:Path} %{CurrentRun:Executable:FilePath}
 Working dir: %{buildDir}
+
+Command: /Users/valentinillich/Qt/5.14.1/clang_64/bin/macdeployqt
+Arguments: %{ActiveProject:BuildConfig:Path}/workTracking.app -qmldir=%{ActiveProject:Path}
+Working dir: %{buildDir}
