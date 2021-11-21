@@ -36,4 +36,5 @@ OTHER_FILES += \
     ressources/version.inc
 
 DISTFILES += \
+  LICENSE.txt \
   README.md
