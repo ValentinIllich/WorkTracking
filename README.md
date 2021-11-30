@@ -26,6 +26,19 @@ Please refr to https://doc.qt.io/qt-5/licensing.html
 
 ## Version History
 
+### Version 2.1.4 (XX.12.2021)
+
+#### New features
+
+#### Fixed problems
+- fixed crash problem with weekly export when no rest is detected automatically but day is excluded by mask
+- 
+
+
+--------------------------------------------
+
+## Version History
+
 ### Version 2.1.3 (20.11.2021)
 
 #### New features

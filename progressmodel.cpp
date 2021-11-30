@@ -433,12 +433,15 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
           startDateTime.setSecsSinceEpoch(nextbegin);
         }
       }
-      else if( getWeekdaySelected(dayofweek) )
+      else
       {
         workingBlockLengths << 4*3600;
         workingBlocksInterrupt << 45*60;
       }
-      //
+
+      timespent += 150; // round in range of 5 minutes
+      timespent = (timespent / 300) * 300;
+
       if( timespent>0 )
       {
         if( getWeekdaySelected(dayofweek) )
@@ -449,8 +452,6 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
             includingRecreation = true;
           }
         }
-        timespent += 150; // round in range of 5 minutes
-        timespent = (timespent / 300) * 300;
 
         quint64 nextBlockLen = workingBlockLengths.takeFirst();
         quint64 nextInterruptLen = workingBlocksInterrupt.takeFirst();
