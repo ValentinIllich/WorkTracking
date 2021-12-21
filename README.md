@@ -20,7 +20,7 @@ Extended features:
 [see complete documentation][1]
 
 This application is based upon the QT 5.12 toolkit or above in its LGPL version.
-Please refr to https://doc.qt.io/qt-5/licensing.html
+Please refer to https://doc.qt.io/qt-5/licensing.html
 
 --------------------------------------------
 
@@ -29,6 +29,7 @@ Please refr to https://doc.qt.io/qt-5/licensing.html
 ### Version 2.1.4 (XX.12.2021)
 
 #### New features
++ adding -p option for changing data file path
 
 #### Fixed problems
 - fixed crash problem with weekly export when no rest is detected automatically but day is excluded by mask

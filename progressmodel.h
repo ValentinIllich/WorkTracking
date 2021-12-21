@@ -115,6 +115,8 @@ public:
   };
   static void setStorageBaseFileName(StorageType type, QString const &filename);
   static QString getStorageBaseFileName(StorageType type);
+  static void setStoragePath(QString const &path);
+  static void cleanupStorage();
 
   QRect geometry() const;
   void setGeometry(const QRect &rect);

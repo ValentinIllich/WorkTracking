@@ -25,10 +25,17 @@
 
 int main(int argc, char *argv[])
 {
-    if( argc==3 && std::string(argv[1])=="-f" )
+    for( int idx=1; idx<(argc-1); idx +=2 )
     {
-      ProgressModel::setStorageBaseFileName(ProgressModel::DataStorage,argv[2]);
-      ProgressModel::setStorageBaseFileName(ProgressModel::DefaultListStorage,QString(argv[2])+"-default");
+      if( std::string(argv[idx])=="-f" )
+      {
+        ProgressModel::setStorageBaseFileName(ProgressModel::DataStorage,argv[idx+1]);
+        ProgressModel::setStorageBaseFileName(ProgressModel::DefaultListStorage,QString(argv[idx+1])+"-default");
+      }
+      if( std::string(argv[idx])=="-p" )
+      {
+        ProgressModel::setStoragePath(argv[idx+1]);
+      }
     }
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -49,5 +56,9 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
-    return app.exec();
+
+    int ret = app.exec();
+
+    ProgressModel::cleanupStorage();
+    return ret;
 }

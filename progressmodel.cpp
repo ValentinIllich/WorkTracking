@@ -251,14 +251,36 @@ void ProgressEntry::addWorkInSeconds(const int &typeOfWork,const qint64 &work)
   }
 }
 
-static QMap<ProgressModel::StorageType,QString> m_storageFile =
-  {{ProgressModel::DataStorage,       "workingOnProjects"},
-   {ProgressModel::DefaultListStorage,"defaultItems"}
-  };
+struct storageFileSettings
+{
+  QMap<ProgressModel::StorageType,QString> m_storageFile =
+                                                          {{ProgressModel::DataStorage,       "workingOnProjects"},
+                                                           {ProgressModel::DefaultListStorage,"defaultItems"}
+                                                          };
+  QString m_storagPath                                    = "";
+};
+
+static storageFileSettings *g_storage = nullptr;
+static storageFileSettings &getFileSettings()
+{
+  if( g_storage==nullptr )
+    g_storage = new storageFileSettings;
+  return *g_storage;
+}
 
 QString getConfigurationsPath(QString const &organization, QString const &application)
 {
   QString path = QDir::homePath()+"/"+organization+"/"+application+"/";
+  QDir dir(path);
+  if( dir.mkpath(path) )
+    return path;
+  else
+    return "";
+}
+
+QString getDataPath(QString const &organization, QString const &application)
+{
+  QString path = getFileSettings().m_storagPath.isEmpty() ? QDir::homePath()+"/"+organization+"/"+application+"/" : getFileSettings().m_storagPath+"/";
   QDir dir(path);
   if( dir.mkpath(path) )
     return path;
@@ -285,7 +307,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   bool todayListIsEmpty = true;
 
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DataStorage)+".csv";
+  QString dataFile = getDataPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DataStorage)+".csv";
   QFile file(dataFile);
   file.open(QFile::ReadOnly);
   QTextStream s(&file);
@@ -300,7 +322,7 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
 
   if( todayListIsEmpty )
   {
-    QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DefaultListStorage)+".csv";
+    QString dataFile = getDataPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DefaultListStorage)+".csv";
     QFile file(dataFile);
     file.open(QFile::ReadOnly);
     QTextStream s(&file);
@@ -912,7 +934,7 @@ void ProgressModel::setLanguage(const int &lang)
 
 void ProgressModel::createDefaultList()
 {
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DefaultListStorage)+".csv";
+  QString dataFile = getDataPath("config-valentins-qtsolutions","workTracking")+"/"+getStorageBaseFileName(DefaultListStorage)+".csv";
 
   QFile file(dataFile);
   file.open(QFile::WriteOnly);
@@ -1226,8 +1248,8 @@ QString ProgressModel::getSummaryText(const ProgressEntry &entry, QVector<quint6
 
 void ProgressModel::saveData(const QString &filename, bool createBackup)
 {
-  QString dataFile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+filename+".csv";
-  QString dataBackup = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/"+filename+"-backup.csv";
+  QString dataFile = getDataPath("config-valentins-qtsolutions","workTracking")+"/"+filename+".csv";
+  QString dataBackup = getDataPath("config-valentins-qtsolutions","workTracking")+"/"+filename+"-backup.csv";
 
   if( createBackup )
   {
@@ -1256,12 +1278,23 @@ void ProgressModel::saveData(const QString &filename, bool createBackup)
 
 void ProgressModel::setStorageBaseFileName(StorageType type, const QString &filename)
 {
-  m_storageFile[type] = filename;
+  getFileSettings().m_storageFile[type] = filename;
 }
 
 QString ProgressModel::getStorageBaseFileName(StorageType type)
 {
-  return m_storageFile[type];
+  return getFileSettings().m_storageFile[type];
+}
+
+void ProgressModel::setStoragePath(const QString &path)
+{
+  getFileSettings().m_storagPath = path;
+}
+
+void ProgressModel::cleanupStorage()
+{
+  delete g_storage;
+  g_storage = nullptr;
 }
 
 QRect ProgressModel::geometry() const
