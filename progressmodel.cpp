@@ -280,12 +280,24 @@ QString getConfigurationsPath(QString const &organization, QString const &applic
 
 QString getDataPath(QString const &organization, QString const &application)
 {
-  QString path = getFileSettings().m_storagPath.isEmpty() ? QDir::homePath()+"/"+organization+"/"+application+"/" : getFileSettings().m_storagPath+"/";
-  QDir dir(path);
-  if( dir.mkpath(path) )
-    return path;
+  QString path = getFileSettings().m_storagPath;
+  if( !path.isEmpty() )
+    return path+"/";
+
+  QString inifile = getConfigurationsPath(organization,application)+"/settings.ini";
+  QSettings settings(inifile,QSettings::IniFormat);
+  if( settings.contains("data-storage-path") )
+  {
+    path = settings.value("data-storage-path").toString();
+    if( !path.endsWith("/") ) path.append("/");
+  }
   else
-    return "";
+  {
+    path = getConfigurationsPath(organization,application);
+    settings.setValue("data-storage-path",path);
+  }
+
+  return path;
 }
 
 ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
