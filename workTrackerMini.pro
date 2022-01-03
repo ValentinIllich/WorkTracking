@@ -1,11 +1,12 @@
 TEMPLATE = app
 TARGET = workTracking
 CONFIG += sdk_no_version_check
-	
-QT += quick
+
+QT += quick widgets
 
 SOURCES += main.cpp \
-  progressmodel.cpp
+  progressmodel.cpp \
+  ../backup/Utilities.cpp
 
 TRANSLATIONS = \
     translations/workTracking_de.ts \
@@ -14,7 +15,8 @@ TRANSLATIONS = \
 RESOURCES += qml.qrc
 
 HEADERS += \
-  progressmodel.h
+  progressmodel.h \
+  ../backup/Utilities.h
 
 win32 {
     RCC_DIR = c:/tmp/backup_$${BUILD}_obj
@@ -32,3 +34,7 @@ OTHER_FILES += \
     ressources/workTracking.rc \
     ressources/Info_mac.plist \
     ressources/version.inc
+
+DISTFILES += \
+  LICENSE.txt \
+  README.md
