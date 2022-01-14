@@ -1036,6 +1036,8 @@ void ProgressModel::updateItemsList()
       }
       break;
     case DisplayMonth:
+      if( item.getTimeStamp().date().year()!=m_actualDate.date().year() )
+        continue;
       if( item.getTimeStamp().date().month()!=m_actualDate.date().month() )
         continue;
       if( item.isRecreationItem() )
@@ -1045,6 +1047,8 @@ void ProgressModel::updateItemsList()
       projectsMap[item.getItemName()].addAllWorkInSeconds(item.getAllWorkInSeconds());
       break;
     case DisplayWeek:
+      if( item.getTimeStamp().date().year()!=m_actualDate.date().year() )
+        continue;
       if( item.getTimeStamp().date().weekNumber()!=m_actualDate.date().weekNumber())
         continue;
       if( item.isRecreationItem() )
@@ -1147,7 +1151,10 @@ void ProgressModel::updateItemsList()
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
+        setWeekdaySelected(day,entry->workInSeconds() > (entry->totalWorkInSeconds()/2) );
       }
+      else
+        setWeekdaySelected(day,false);
     }
   }
   if( dayList.size()>0 )

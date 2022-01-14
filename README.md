@@ -30,10 +30,12 @@ Please refer to https://doc.qt.io/qt-5/licensing.html
 
 #### New features
 + adding -p option for changing data file path
++ adding ini file entry <> for data file path
++ now preselecting days for weekly report only when current work > 50% of total work
 
 #### Fixed problems
 - fixed crash problem with weekly export when no rest is detected automatically but day is excluded by mask
-- 
+- fixing problem in month / week view when more than one year is stored
 
 
 --------------------------------------------
