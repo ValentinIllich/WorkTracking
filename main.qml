@@ -429,6 +429,7 @@ ApplicationWindow {
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
                         onToggled: projectData.setWeekdaySelected(0,checked)
+                        onVisibleChanged: checked = projectData.getWeekdaySelected(0)
                     }
                     RoundButton {
                         text: qsTr("Tu")
@@ -437,6 +438,7 @@ ApplicationWindow {
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
                         onToggled: projectData.setWeekdaySelected(1,checked)
+                        onVisibleChanged: checked = projectData.getWeekdaySelected(1)
                     }
                     RoundButton {
                         text: qsTr("We")
@@ -445,6 +447,7 @@ ApplicationWindow {
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
                         onToggled: projectData.setWeekdaySelected(2,checked)
+                        onVisibleChanged: checked = projectData.getWeekdaySelected(2)
                     }
                     RoundButton {
                         text: qsTr("Th")
@@ -453,6 +456,7 @@ ApplicationWindow {
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
                         onToggled: projectData.setWeekdaySelected(3,checked)
+                        onVisibleChanged: checked = projectData.getWeekdaySelected(3)
                     }
                     RoundButton {
                         text: qsTr("Fr")
@@ -461,6 +465,7 @@ ApplicationWindow {
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
                         onToggled: projectData.setWeekdaySelected(4,checked)
+                        onVisibleChanged: checked = projectData.getWeekdaySelected(4)
                     }
                 }
 //                RowLayout
