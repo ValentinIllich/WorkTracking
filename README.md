@@ -7,14 +7,14 @@ The main features are:
 - unlimited, individual work items per day
 - distinguish betweeh mobile (home) and offfice work
 - start / stop recording time spent for a specific item just by click
-- full control over spent times: correcting wrong recordings afterwards
+- full control over spent times: ability to correct wrong recordings afterwards
 - managing a default list for new days
 
 Extended features:
 
 - automatic tracking of breaks during recording (more than 5 minutes)
 - export of spent times per day / week / month / year into clipboard (EXCel format)
-- ability of an optional automatic addition of break times if work exceeds a certain limit
+- ability of an optional automatic addition of break times in export if work exceeds a certain limit
 
 
 [see complete documentation][1]
@@ -28,7 +28,19 @@ This project is still in use but works quite well. So actually no need for chang
 
 ## Version History
 
-### Version 2.1.4 (XX.12.2021)
+### Version 2.1.5 (15.02.2022)
+
+#### New features
++ now exporting break after either given threshold time or half of the recorded time if no recorded break found and automatic enabled for day
+  (was fixed to always using 4 hours)
+
+#### Fixed problems
+- 
+
+
+--------------------------------------------
+
+### Version 2.1.4 (27.12.2021)
 
 #### New features
 + adding -p option for changing data file path

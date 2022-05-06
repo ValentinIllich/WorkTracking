@@ -403,7 +403,8 @@ void ProgressModel::setCurrentRecordingAccount(const int &account)
 
 void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QString &thresholdHours)
 {
-  updateItemsList();
+  // this will ensure that m_totalWorkSeconds is correct
+  updateItemsList(false);
 
   quint64 threashold = thresholdHours.toULong();
   quint64 additional = additionalMinutes.toULong();
@@ -469,8 +470,11 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
       }
       else
       {
-        workingBlockLengths << 4*3600;
-        workingBlocksInterrupt << 45*60;
+        if( getWeekdaySelected(dayofweek) )
+        {
+          workingBlockLengths << (threashold>0 ? threashold : timespent/2)*3600;
+          workingBlocksInterrupt << (threashold>0 ? additional : 30)*60;
+        }
       }
 
       timespent += 150; // round in range of 5 minutes
@@ -478,17 +482,30 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
 
       if( timespent>0 )
       {
+        // if the list with working blocks is empty just use a block which is big enough for all needs
+        quint64 nextBlockLen = workingBlockLengths.isEmpty() ? 10*3600 : workingBlockLengths.takeFirst();
+        quint64 nextInterruptLen = workingBlocksInterrupt.isEmpty() ? 60*60 : workingBlocksInterrupt.takeFirst();
+        bool isCompleteTimeSpentInFIrstWorkingBlock = false;
+
+        // check if the complete spent time is within the first workin block
+        if( nextBlockLen+5*60 > timespent )
+          isCompleteTimeSpentInFIrstWorkingBlock = true;
+
+        // add additional rest time of specified by export settings
         if( getWeekdaySelected(dayofweek) )
         {
           if( threashold>0 && totalSpent>(threashold*3600) )
           {
             timespent += additional*60;
             includingRecreation = true;
+            //adjust the starting time of first block if needed
+            if( isCompleteTimeSpentInFIrstWorkingBlock )
+            {
+              startTime = startTime.addSecs(-additional*60);
+              nextBlockLen += additional*60;
+            }
           }
         }
-
-        quint64 nextBlockLen = workingBlockLengths.takeFirst();
-        quint64 nextInterruptLen = workingBlocksInterrupt.takeFirst();
 
         while( timespent>nextBlockLen )
         {
@@ -1000,7 +1017,7 @@ void ProgressModel::setQmlEngine(QQmlApplicationEngine &engine)
   m_qmlEngine = &engine;
 }
 
-void ProgressModel::updateItemsList()
+void ProgressModel::updateItemsList(bool setDaySelectionToDefault)
 {
   m_progressItems.clear();
   m_recreationEntries.clear();
@@ -1151,9 +1168,9 @@ void ProgressModel::updateItemsList()
         entry->setSummary(getSummaryText(item,m_totalWorkSeconds));
 
         m_progressItems << entry;
-        setWeekdaySelected(day,entry->workInSeconds() > (entry->totalWorkInSeconds()/2) );
+        if( setDaySelectionToDefault ) setWeekdaySelected(day,entry->workInSeconds() > (entry->totalWorkInSeconds()/2) );
       }
-      else
+      else if( setDaySelectionToDefault )
         setWeekdaySelected(day,false);
     }
   }

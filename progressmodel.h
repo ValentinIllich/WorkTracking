@@ -204,7 +204,7 @@ private:
   const int eAccountHomework   = 0x0001;
   const int eAccountOfficeWork = 0x0002;
 
-  void updateItemsList();
+  void updateItemsList(bool setDaySelectionToDefault = true);
   QString humanReadableMonth(int month);
   QString humanReadableWeekDay(int weekday);
   QString humanReadableDate(QDateTime date);

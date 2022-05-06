@@ -428,7 +428,7 @@ ApplicationWindow {
                         checked: projectData.getWeekdaySelected(0)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
-                        onToggled: projectData.setWeekdaySelected(0,checked)
+                        onClicked: projectData.setWeekdaySelected(0,checked)
                         onVisibleChanged: checked = projectData.getWeekdaySelected(0)
                     }
                     RoundButton {
@@ -437,7 +437,7 @@ ApplicationWindow {
                         checked: projectData.getWeekdaySelected(1)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
-                        onToggled: projectData.setWeekdaySelected(1,checked)
+                        onClicked: projectData.setWeekdaySelected(1,checked)
                         onVisibleChanged: checked = projectData.getWeekdaySelected(1)
                     }
                     RoundButton {
@@ -446,7 +446,7 @@ ApplicationWindow {
                         checked: projectData.getWeekdaySelected(2)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
-                        onToggled: projectData.setWeekdaySelected(2,checked)
+                        onClicked: projectData.setWeekdaySelected(2,checked)
                         onVisibleChanged: checked = projectData.getWeekdaySelected(2)
                     }
                     RoundButton {
@@ -455,7 +455,7 @@ ApplicationWindow {
                         checked: projectData.getWeekdaySelected(3)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
-                        onToggled: projectData.setWeekdaySelected(3,checked)
+                        onClicked: projectData.setWeekdaySelected(3,checked)
                         onVisibleChanged: checked = projectData.getWeekdaySelected(3)
                     }
                     RoundButton {
@@ -464,7 +464,7 @@ ApplicationWindow {
                         checked: projectData.getWeekdaySelected(4)
                         checkable: true
                         Material.background: checked ? Material.accent : "transparent"
-                        onToggled: projectData.setWeekdaySelected(4,checked)
+                        onClicked: projectData.setWeekdaySelected(4,checked)
                         onVisibleChanged: checked = projectData.getWeekdaySelected(4)
                     }
                 }
