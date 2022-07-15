@@ -16,6 +16,10 @@ Extended features:
 - export of spent times per day / week / month / year into clipboard (EXCel format)
 - ability of an optional automatic addition of break times in export if work exceeds a certain limit
 
+- alerting with acoustical if mouse movement detected without active item
+- alerting with acoustical signal given when recorded time exceeds a given limit
+- recognizing mouse inactivity while item active: asking user what to do
+
 
 [see complete documentation][1]
 
@@ -27,6 +31,28 @@ This project is still in use but works quite well. So actually no need for chang
 --------------------------------------------
 
 ## Version History
+
+### Version 2.1.7 (15.07.2022)
+
+#### Fixed problems
+- fixing several problems with new features
+
+
+--------------------------------------------
+
+### Version 2.1.6 (13.06.2022)
+
+#### New features
++ adding visual alert function: yellow colored an red colored with given limits
+  alert values specified within INI file
++ adding stop of recording after given time of inactivity
+  inactivita period specified within INI file
+
+#### Fixed problems
+- now adjusting window position if it was stored outside current screen resolution
+
+
+--------------------------------------------
 
 ### Version 2.1.5 (15.02.2022)
 

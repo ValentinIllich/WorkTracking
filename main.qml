@@ -27,7 +27,6 @@ import QtQuick.Window 2.11
 import QtQuick.Dialogs 1.1
 import Qt.labs.settings 1.0
 import Qt.labs.calendar 1.0
-
 import ProjectsData 1.0
 
 ApplicationWindow {
@@ -38,7 +37,7 @@ ApplicationWindow {
 
     property color textColor: Material.foreground
 
-    id: window
+    id: mainWindow
     x: windowx
     y: windowy
     width: windowWidth
@@ -54,117 +53,124 @@ ApplicationWindow {
     ProgressModel {
         id: projectData
         onRecordingDisabled: jumpmenu.open()
+        onRecordingStopped: recordingstopped.open()
     }
 
-    RoundButton {
-        id: currentDate
-        text: projectData.title
-        anchors.top: parent.top
-        anchors.topMargin: 8
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: Qt.application.font.pixelSize * 2
-        font.capitalization: Font.MixedCase
-        onClicked: jumpmenu.open()
-        ToolTip.delay: 2000
-        ToolTip.timeout: 10000
-        ToolTip.visible: hovered
-        ToolTip.text: qsTr("Navigation menu")
-    }
-
-    ListView {
-        id: workListView
-        anchors.topMargin: currentDate.height + 2*8
-        anchors.bottomMargin: addAlarmButton.height
+    Rectangle {
+        id: mainwindow
         anchors.fill: parent
-        model: projectData.itemList
-        delegate: WorkDelegate {}
-    }
+        color: projectData.backgrundColor
 
-    RoundButton {
-        id: prevButton
-        text: "<"
-        anchors.left: parent.left
-        anchors.leftMargin: 8
-        anchors.top: parent.top
-        anchors.topMargin: 8
-        onClicked: projectData.previous()
-        ToolTip.delay: 2000
-        ToolTip.timeout: 10000
-        ToolTip.visible: hovered
-        ToolTip.text: qsTr("select previous time period")
-    }
+        RoundButton {
+            id: currentDate
+            text: projectData.title
+            anchors.top: parent.top
+            anchors.topMargin: 8
+            anchors.horizontalCenter: parent.horizontalCenter
+            font.pixelSize: Qt.application.font.pixelSize * 2
+            font.capitalization: Font.MixedCase
+            onClicked: jumpmenu.open()
+            ToolTip.delay: 2000
+            ToolTip.timeout: 10000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Navigation menu")
+        }
 
-    RoundButton {
-        id: nextButton
-        text: ">"
-        anchors.right: parent.right
-        anchors.rightMargin: 8
-        anchors.top: parent.top
-        anchors.topMargin: 8
-        onClicked: projectData.next()
-        ToolTip.delay: 2000
-        ToolTip.timeout: 10000
-        ToolTip.visible: hovered
-        ToolTip.text: qsTr("select next time period")
-    }
+        ListView {
+            id: workListView
+            anchors.topMargin: currentDate.height + 2*8
+            anchors.bottomMargin: addAlarmButton.height
+            anchors.fill: parent
+            model: projectData.itemList
+            delegate: WorkDelegate {}
+        }
 
-    RoundButton {
-        id: modeButton
-        text: "..."
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 8
-        anchors.left: parent.left
-        anchors.leftMargin: 8
-        onClicked: displaymenu.open()
-        onPressAndHold: configmenu.open()
-        ToolTip.delay: 2000
-        ToolTip.timeout: 10000
-        ToolTip.visible: hovered
-        ToolTip.text: qsTr("short press: display menu\nlong presas: config menu")
-    }
+        RoundButton {
+            id: prevButton
+            text: "<"
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            anchors.top: parent.top
+            anchors.topMargin: 8
+            onClicked: projectData.previous()
+            ToolTip.delay: 2000
+            ToolTip.timeout: 10000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("select previous time period")
+        }
 
-    RoundButton {
-        id: addAlarmButton
-        text: "+"
-        visible: projectData.isChangeable
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 8
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.horizontalCenterOffset: -helpButton.width / 2
-        onClicked: workDialog.open()
-        ToolTip.delay: 2000
-        ToolTip.timeout: 10000
-        ToolTip.visible: hovered
-        ToolTip.text: qsTr("add a new work item")
-    }
+        RoundButton {
+            id: nextButton
+            text: ">"
+            anchors.right: parent.right
+            anchors.rightMargin: 8
+            anchors.top: parent.top
+            anchors.topMargin: 8
+            onClicked: projectData.next()
+            ToolTip.delay: 2000
+            ToolTip.timeout: 10000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("select next time period")
+        }
 
-    RoundButton {
-        id: helpButton
-        text: "?"
-        visible: projectData.isChangeable
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 8
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.horizontalCenterOffset: addAlarmButton.width / 2
-        onClicked: projectData.showHelp()
-        ToolTip.delay: 2000
-        ToolTip.timeout: 10000
-        ToolTip.visible: hovered
-        ToolTip.text: qsTr("open documentation")
-    }
+        RoundButton {
+            id: modeButton
+            text: "..."
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 8
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            onClicked: displaymenu.open()
+            onPressAndHold: configmenu.open()
+            ToolTip.delay: 2000
+            ToolTip.timeout: 10000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("short press: display menu\nlong presas: config menu")
+        }
 
-    RoundButton {
-        id: sumButton
-        text: projectData.totalTime
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 8
-        anchors.right: parent.right
-        anchors.rightMargin: 8
-        onClicked: projectData.changeSummary()
-        ToolTip.delay: 2000
-        ToolTip.timeout: 10000
-        ToolTip.visible: hovered
-        ToolTip.text: qsTr("switch between hours and percent\n(but not in day view)")
+        RoundButton {
+            id: addAlarmButton
+            text: "+"
+            visible: projectData.isChangeable
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 8
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: -helpButton.width / 2
+            onClicked: workDialog.open()
+            ToolTip.delay: 2000
+            ToolTip.timeout: 10000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("add a new work item")
+        }
+
+        RoundButton {
+            id: helpButton
+            text: "?"
+            visible: projectData.isChangeable
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 8
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: addAlarmButton.width / 2
+            onClicked: projectData.showHelp()
+            ToolTip.delay: 2000
+            ToolTip.timeout: 10000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("open documentation")
+        }
+
+        RoundButton {
+            id: sumButton
+            text: projectData.totalTime
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 8
+            anchors.right: parent.right
+            anchors.rightMargin: 8
+            onClicked: projectData.changeSummary()
+            ToolTip.delay: 2000
+            ToolTip.timeout: 10000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("switch between hours and percent\n(but not in day view)")
+        }
     }
 
     function jumpToDay(day,month,year) {
@@ -187,6 +193,11 @@ ApplicationWindow {
             Material.foreground: projectData.currentRecordingAccount == 1 ? Material.accent : textColor
             text: qsTr("Recording in office")
             onTriggered: projectData.currentRecordingAccount = 1
+        }
+        MenuItem {
+            width: windowWidth
+            text: qsTr("Enter checkin time")
+            onTriggered: checkedInOn.open()
         }
         MenuSeparator {
             width: windowWidth // needed for language changes
@@ -498,7 +509,80 @@ ApplicationWindow {
         }
     }
 
-    WorkDialog {
+    function recordingstopignore()
+    {
+        projectData.cancelAutoStop()
+        recordingstopped.close()
+    }
+
+    Popup {
+        id: recordingstopped
+        //anchors.centerIn: parent
+        //y: sumButton.y-implicitHeight
+        width: parent.width
+        //x: Math.round((windowWidth - implicitWidth) / 2)
+        y: Math.round((windowHeight - implicitHeight) / 2)
+
+        ColumnLayout {
+            width: windowWidth
+            //anchors.fill: parent
+            Label {
+                text: qsTr("recording stopped due to inactivity")
+            }
+            RowLayout
+            {
+                Button {
+                    text: qsTr("Reject")
+                    onClicked: recordingstopignore()
+                }
+                Button {
+                    text: qsTr("Accept")
+                    onClicked: recordingstopped.close()
+                }
+            }
+
+        }
+    }
+
+    function enterCheckin(time) {
+        projectData.enterCheckin(time)
+        checkedInOn.close()
+    }
+
+    Popup {
+        id: checkedInOn
+        //anchors.centerIn: parent
+        //y: sumButton.y-implicitHeight
+        y: currentDate.height+8
+        width: parent.width
+        //x: Math.round((windowWidth - implicitWidth) / 2)
+        //y: Math.round((windowHeight - implicitHeight) / 2)
+
+        ColumnLayout {
+            width: windowWidth
+            //anchors.fill: parent
+            Label {
+                text: qsTr("enter chekin time")
+            }
+            TextField {
+              id: checkinTime
+              placeholderText: qsTr("hh:mm")
+              text: ""
+            }
+            RowLayout {
+                Button {
+                  text: qsTr("Cancel")
+                  onClicked: checkedInOn.close()
+                }
+                Button {
+                  text: qsTr("OK")
+                  onClicked: enterCheckin(checkinTime.text)
+                }
+            }
+        }
+    }
+
+WorkDialog {
         id: workDialog
         x: Math.round((windowWidth - implicitWidth) / 2)
         y: Math.round((windowHeight - implicitHeight) / 2)

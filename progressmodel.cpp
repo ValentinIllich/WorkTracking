@@ -22,7 +22,7 @@
 #include "../backup/Utilities.h"
 #include "ressources/version.inc"
 
-QQmlEngine *m_qmlEngine;
+QQmlApplicationEngine *m_qmlEngine;
 
 ProgressEntry::ProgressEntry()
 {
@@ -311,6 +311,22 @@ ProgressModel::ProgressModel(QObject *parent) : QObject(parent)
   if( settings.contains("window-geometry") )
     m_windowGeometry = settings.value("window-geometry").toRect();
 
+  QList<QScreen*> screens = qApp->screens();
+  QSize screensize = screens[0]->size();
+
+  if( (m_windowGeometry.x()+m_windowGeometry.width())>screensize.width() )
+    m_windowGeometry.moveLeft(screensize.width()-m_windowGeometry.width());
+  if( (m_windowGeometry.y()+m_windowGeometry.height())>screensize.height() )
+    m_windowGeometry.moveTop(screensize.height()-m_windowGeometry.height());
+
+  if( settings.contains("yellow-alert-begin") )
+    m_yellowAlertLimit = settings.value("yellow-alert-begin").toULongLong();
+  if( settings.contains("red-alert-begin") )
+    m_redAlertLimit = settings.value("red-alert-begin").toULongLong();
+
+  if( settings.contains("inactivity-stop-limit") )
+    m_inactivityLimit = settings.value("inactivity-stop-limit").toULongLong();
+
   m_actualDate = QDateTime::currentDateTime();
 
   QTimer *timer = new QTimer(this);
@@ -355,6 +371,9 @@ ProgressModel::~ProgressModel()
   QString inifile = getConfigurationsPath("config-valentins-qtsolutions","workTracking")+"/settings.ini";
   QSettings settings(inifile,QSettings::IniFormat);
   settings.setValue("window-geometry",m_windowGeometry);
+  settings.setValue("yellow-alert-begin",m_yellowAlertLimit);
+  settings.setValue("red-alert-begin",m_redAlertLimit);
+  settings.setValue("inactivity-stop-limit",m_inactivityLimit);
 }
 
 QDateTime ProgressModel::actualDate() const
@@ -381,6 +400,7 @@ void ProgressModel::setMode(const ProgressModel::OperatingMode &mode)
   emit totalTimeChanged();
   emit modeChanged();
   emit showExportDaysChanged();
+  emit backgrundColorChanged();
 }
 
 int ProgressModel::currentRecordingAccount()
@@ -510,7 +530,9 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
         while( timespent>nextBlockLen )
         {
           QTime endTime = startTime.addSecs(nextBlockLen);
-          data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\n";
+          //data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\n";
+          data += item->projectName() + "\tMobiles Arbeiten Beginn\t" + startTime.toString("hh:mm")+":00\n";
+          data += item->projectName() + "\tMobiles Arbeiten Ende\t" + endTime.toString("hh:mm")+":00\n";
           startTime = startTime.addSecs(nextBlockLen + nextInterruptLen);
           timespent -= nextBlockLen;
 
@@ -522,7 +544,9 @@ void ProgressModel::exportToClipboard(const QString &additionalMinutes,const QSt
         }
         QTime endTime = startTime.addSecs(timespent);
         QString comment = includingRecreation ? "inkl. Pause" : "";
-        data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\t" + comment + "\n";
+        //data += item->projectName() + "\t" + startTime.toString("hh:mm") + "\t" + endTime.toString("hh:mm") + "\t" + comment + "\n";
+        data += item->projectName() + "\tMobiles Arbeiten Beginn\t" + startTime.toString("hh:mm")+":00\n";
+        data += item->projectName() + "\tMobiles Arbeiten Ende\t" + endTime.toString("hh:mm")+":00\t" + comment + "\n";
       }
     }
   }
@@ -641,32 +665,7 @@ bool ProgressModel::showExportDays()
 
 QString ProgressModel::totalTime() const
 {
-  ProgressEntry summary;
-  summary.setItemActive(false);
-  summary.setWorkInSeconds(0,0);
-  switch( m_operatingMode )
-  {
-  case DisplayYear:
-  case DisplayMonth:
-  case DisplayWeek:
-    summary.setWorkInSeconds(0,m_totalWorkSeconds[0]);
-    summary.setWorkInSeconds(1,m_totalWorkSeconds[1]);
-    break;
-  case DisplayRecordDay:
-    for( int i=0; i<m_progressEntries.size(); i++ )
-    {
-      for( int j=0; j<m_progressItems.size(); j++ )
-      {
-        if( m_progressEntries[i].isRecreationItem() )
-          continue;
-        if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
-          summary.addAllWorkInSeconds(m_progressEntries[i].getAllWorkInSeconds());
-      }
-    }
-    break;
-  }
-
-  return getSummaryText(summary,QVector<quint64>({0,0})); // todo m_totalWorkSeconds
+  return getSummaryText(getTotalTime(),QVector<quint64>({0,0})); // todo m_totalWorkSeconds
 }
 
 void ProgressModel::itemStateChanged()
@@ -727,7 +726,7 @@ void ProgressModel::itemAccountChanged()
 void ProgressModel::workingTimer()
 {
   QDateTime current = QDateTime::currentDateTime();
-  qint64 elapsed = current.currentSecsSinceEpoch();
+  quint64 elapsed = current.currentSecsSinceEpoch();
 
   if( elapsed==m_lastElapsed)
     return;
@@ -788,9 +787,77 @@ void ProgressModel::workingTimer()
     updateItemsList();
   }
   else
+  {
     m_recordedSeconds++;
+  }
 
   m_runningSeconds++;
+
+  if( (m_runningSeconds%5) == 0 )
+  {
+    QPoint globalCursorPos = QCursor::pos();
+    if( m_lastx==-1 && m_lasty==-1 )
+    {
+      m_lastx = globalCursorPos.x();
+      m_lasty = globalCursorPos.y();
+      m_lastActivity = m_runningSeconds;
+    }
+    else if( globalCursorPos.x()!=m_lastx || globalCursorPos.y()!=m_lasty )
+    {
+      m_lastx = globalCursorPos.x();
+      m_lasty = globalCursorPos.y();
+      m_lastActivity = m_runningSeconds;
+
+      if( isCurrnetIdle )
+      {
+        QObject *root = m_qmlEngine->rootObjects().at(0);
+        static_cast<QWindow*>(root)->alert(0);
+        qApp->beep();
+      }
+    }
+    else
+    {
+      if( !isCurrnetIdle )
+      {
+        if( (m_runningSeconds-m_lastActivity)>m_inactivityLimit )
+        {
+          for( int i=0; i<m_progressEntries.size(); i++ )
+          {
+            if( m_progressEntries[i].getItemActive() )
+            {
+              m_progressEntries[i].setItemActive(false);
+              m_progressEntries[i].addWorkInSeconds(m_currentRecordingAccount,-m_inactivityLimit);
+
+              m_lastRecordingItem = m_progressEntries[i].getId();
+              for( int j=0; j<m_progressItems.size(); j++ )
+              {
+                if( m_progressItems.at(j)->getId()==m_lastRecordingItem )
+                {
+                  m_progressItems.at(j)->setIsActive(false);
+                  m_progressItems.at(j)->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
+                }
+              }
+
+              m_lastRecordingAccount = m_currentRecordingAccount;
+              m_lastRecordingSeconds = m_runningSeconds-m_inactivityLimit;
+              m_idleSinceSeconds = m_inactivityLimit;
+
+              m_currentRecordingAccount = -1;
+
+              emit totalTimeChanged();
+              emit recordingStopped();
+              emit currentRecordingAccountChanged();
+
+              QObject *root = m_qmlEngine->rootObjects().at(0);
+              static_cast<QWindow*>(root)->alert(0);
+              qApp->beep();
+            }
+          }
+        }
+      }
+    }
+  }
+
   if( (m_runningSeconds % 300) == 0)
   {
     if( m_dataChanged )
@@ -800,7 +867,32 @@ void ProgressModel::workingTimer()
     }
   }
 
+  ProgressEntry summary = getTotalTime();
+  quint64 workedsofar = getSummaryWorkInSeconds(summary);
+  quint64 checkinSince = m_checkinTime==-1 ? 0 : m_lastElapsed - m_checkinTime;
+  quint64 value = std::max<quint64>(workedsofar,checkinSince);
+
+  if( value>m_redAlertLimit )
+  {
+    if( (m_runningSeconds % 30) == 0)
+    {
+      QObject *root = m_qmlEngine->rootObjects().at(0);
+      static_cast<QWindow*>(root)->alert(0);
+      qApp->beep();
+    }
+  }
+  if( value>m_yellowAlertLimit )
+  {
+    if( (m_runningSeconds % 300) == 0)
+    {
+      QObject *root = m_qmlEngine->rootObjects().at(0);
+      static_cast<QWindow*>(root)->alert(0);
+      qApp->beep();
+    }
+  }
+
   emit totalTimeChanged();
+  emit backgrundColorChanged();
 }
 
 QString ProgressModel::getProgramVersion()
@@ -830,6 +922,7 @@ void ProgressModel::previous()
   emit totalTimeChanged();
   emit actualDateChanged();
   emit titleChanged();
+  emit backgrundColorChanged();
 }
 
 void ProgressModel::next()
@@ -854,6 +947,7 @@ void ProgressModel::next()
   emit actualDateChanged();
   emit titleChanged();
   emit totalTimeChanged();
+  emit backgrundColorChanged();
 }
 
 void ProgressModel::jumpToDay(const int &day, const int &month, const int &year)
@@ -876,8 +970,64 @@ void ProgressModel::jumpToDay(const int &day, const int &month, const int &year)
 
   updateItemsList();
   emit totalTimeChanged();
+  emit backgrundColorChanged();
   emit actualDateChanged();
   emit titleChanged();
+}
+
+void ProgressModel::enterCheckin(const QString &checkin)
+{
+  qDebug() << checkin;
+  QDateTime actual = QDateTime::currentDateTime();
+  QTime time = actual.time();
+  time.setHMS(checkin.midRef(0,2).toInt(),checkin.midRef(3,2).toInt(),0);
+  actual.setTime(time);
+
+  m_checkinTime = actual.toSecsSinceEpoch();
+
+  for( int i=0; i<m_progressEntries.size(); i++ )
+  {
+    if( m_progressEntries[i].getItemActive() )
+    {
+      qint64 firstRecording = m_progressEntries[i].getRecordingStart(m_currentRecordingAccount).toSecsSinceEpoch();
+      if( firstRecording>m_checkinTime )
+      {
+        quint64 delta = firstRecording-m_checkinTime;
+        m_progressEntries[i].addWorkInSeconds(m_currentRecordingAccount,delta);
+        m_progressEntries[i].setRecordingStart(m_currentRecordingAccount,QDateTime::fromSecsSinceEpoch(m_checkinTime));
+        for( int j=0; j<m_progressItems.size(); j++ )
+        {
+          if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
+          {
+            m_progressItems.at(j)->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
+          }
+        }
+      }
+    }
+  }
+}
+
+void ProgressModel::cancelAutoStop()
+{
+  m_idleSinceSeconds = 0;
+  m_currentRecordingAccount = m_lastRecordingAccount;
+
+  for( int i=0; i<m_progressEntries.size(); i++ )
+  {
+    if( m_progressEntries[i].getId()==m_lastRecordingItem )
+    {
+      m_progressEntries[i].setItemActive(true);
+      m_progressEntries[i].addWorkInSeconds(m_lastRecordingAccount,m_runningSeconds-m_lastRecordingSeconds);
+      for( int j=0; j<m_progressItems.size(); j++ )
+      {
+        if( m_progressItems.at(j)->getId()==m_lastRecordingItem )
+        {
+          m_progressItems.at(j)->setIsActive(true);
+          m_progressItems.at(j)->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
+        }
+      }
+    }
+  }
 }
 
 void ProgressModel::changeSummary()
@@ -909,6 +1059,7 @@ void ProgressModel::append(const QString &name, const QString &description, cons
 
   updateItemsList();
   emit totalTimeChanged();
+  emit backgrundColorChanged();
 }
 
 void ProgressModel::remove(const int &index)
@@ -926,6 +1077,7 @@ void ProgressModel::remove(const int &index)
 
   updateItemsList();
   emit totalTimeChanged();
+  emit backgrundColorChanged();
 }
 
 void ProgressModel::addSeconds(const int &index, const int &diff)
@@ -947,6 +1099,7 @@ void ProgressModel::addSeconds(const int &index, const int &diff)
   }
 
   emit totalTimeChanged();
+  emit backgrundColorChanged();
 }
 
 void ProgressModel::setLanguage(const int &lang)
@@ -992,6 +1145,7 @@ void ProgressModel::setAccountSelected(const int &account, const bool &enabled)
 
   updateItemsList();
   emit totalTimeChanged();
+  emit backgrundColorChanged();
 }
 
 bool ProgressModel::getWeekdaySelected(const int &wday)
@@ -1206,6 +1360,36 @@ void ProgressModel::updateItemsList(bool setDaySelectionToDefault)
   emit itemListChanged();
 }
 
+ProgressEntry ProgressModel::getTotalTime() const
+{
+  ProgressEntry summary;
+  summary.setItemActive(false);
+  summary.setWorkInSeconds(0,0);
+  switch( m_operatingMode )
+  {
+  case DisplayYear:
+  case DisplayMonth:
+  case DisplayWeek:
+    summary.setWorkInSeconds(0,m_totalWorkSeconds[0]);
+    summary.setWorkInSeconds(1,m_totalWorkSeconds[1]);
+    break;
+  case DisplayRecordDay:
+    for( int i=0; i<m_progressEntries.size(); i++ )
+    {
+      for( int j=0; j<m_progressItems.size(); j++ )
+      {
+        if( m_progressEntries[i].isRecreationItem() )
+          continue;
+        if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
+          summary.addAllWorkInSeconds(m_progressEntries[i].getAllWorkInSeconds());
+      }
+    }
+    break;
+  }
+
+  return summary;
+}
+
 quint64 ProgressModel::getSummaryWorkInSeconds(const ProgressEntry &entry,bool getTotalSummary) const
 {
   quint64 value = 0;
@@ -1342,6 +1526,44 @@ void ProgressModel::setGeometry(const QRect &rect)
 {
   m_windowGeometry = rect;
   emit geometryChanged();
+}
+
+QString ProgressModel::backgrundColor()
+{
+  ProgressEntry summary;
+  summary.setItemActive(false);
+  summary.setWorkInSeconds(0,0);
+  switch( m_operatingMode )
+  {
+  case DisplayRecordDay:
+    for( int i=0; i<m_progressEntries.size(); i++ )
+    {
+      for( int j=0; j<m_progressItems.size(); j++ )
+      {
+        if( m_progressEntries[i].isRecreationItem() )
+          continue;
+        if( m_progressItems.at(j)->getId()==m_progressEntries[i].getId() )
+          summary.addAllWorkInSeconds(m_progressEntries[i].getAllWorkInSeconds());
+      }
+    }
+    break;
+  default:
+    break;
+  }
+
+  quint64 workedsofar = getSummaryWorkInSeconds(summary,true);
+  quint64 checkinSince = m_checkinTime==-1 ? 0 : m_lastElapsed - m_checkinTime;
+  quint64 totalWork = std::max<quint64>(workedsofar,checkinSince);
+  if( totalWork>m_redAlertLimit )
+  {
+    return "#aa0000";
+  }
+  if( totalWork>m_yellowAlertLimit )
+  {
+    return "#aaaa00";
+  }
+  else
+    return "";
 }
 
 ProgressItem::ProgressItem()

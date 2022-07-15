@@ -80,6 +80,7 @@ class ProgressModel : public QObject
   Q_OBJECT
 
   Q_PROPERTY(QRect geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
+  Q_PROPERTY(QString backgrundColor READ backgrundColor NOTIFY backgrundColorChanged)
 
   Q_PROPERTY(QDateTime actualDate READ actualDate WRITE setActualDate NOTIFY actualDateChanged)
   Q_PROPERTY(OperatingMode mode READ mode WRITE setMode NOTIFY modeChanged)
@@ -121,6 +122,8 @@ public:
   QRect geometry() const;
   void setGeometry(const QRect &rect);
 
+  QString backgrundColor();
+
   QDateTime actualDate() const;
   void setActualDate(const QDateTime &);
 
@@ -155,6 +158,7 @@ public:
   Q_SLOT void workingTimer();
 
   Q_SIGNAL void geometryChanged();
+  Q_SIGNAL void backgrundColorChanged();
   Q_SIGNAL void actualDateChanged();
   Q_SIGNAL void modeChanged();
   Q_SIGNAL void currentRecordingAccountChanged();
@@ -170,12 +174,15 @@ public:
 
   Q_SIGNAL void languageChanged();
   Q_SIGNAL void recordingDisabled();
+  Q_SIGNAL void recordingStopped();
 
   Q_INVOKABLE QString getProgramVersion();
 
   Q_INVOKABLE void previous();
   Q_INVOKABLE void next();
   Q_INVOKABLE void jumpToDay(const int &day,const int &month,const int &year);
+  Q_INVOKABLE void enterCheckin(const QString &checkin);
+  Q_INVOKABLE void cancelAutoStop();
 
   Q_INVOKABLE void exportToClipboard(const QString &,const QString &);
   Q_INVOKABLE void changeSummary();
@@ -209,6 +216,8 @@ private:
   QString humanReadableWeekDay(int weekday);
   QString humanReadableDate(QDateTime date);
 
+  ProgressEntry getTotalTime() const;
+
   quint64 getSummaryWorkInSeconds(ProgressEntry const &entry, bool getTotalSummary = false) const;
   QDateTime getFirstRecordingTime(const ProgressEntry &entry,int account) const;
   QString getSummaryText(ProgressEntry const &entry, QVector<quint64> totalWorkInSeconds, bool clipboardFormat = false) const;
@@ -222,6 +231,10 @@ private:
   QMap<int, QList<ProgressEntry> > m_recreationEntries;
 
   QRect m_windowGeometry                  = QRect(100,100,400,600);
+
+  quint64 m_redAlertLimit                 = 33300; // 9.25 h without break!
+  quint64 m_yellowAlertLimit              = 32400; // 9h without break!
+  quint64 m_inactivityLimit               = 900; // 15 min
 
   int m_nextId                            = 12345678;
 
@@ -238,11 +251,20 @@ private:
 
   quint64 m_runningSeconds                = 0;
   bool m_dataChanged                      = false;
-  qint64 m_lastElapsed                    = 0;
+  quint64 m_lastElapsed                   = 0;
 
   int m_recordedSeconds                   = 0;
   int m_idleSinceSeconds                  = 0;
   int m_recordingRequestedItem            = -1;
+
+  int m_lastx                             = -1;
+  int m_lasty                             = -1;
+
+  quint64 m_lastActivity                  = 0;
+  int m_lastRecordingItem                 = -1;
+  int m_lastRecordingAccount              = -1;
+  quint64 m_lastRecordingSeconds          = 0;
+  qint64 m_checkinTime                    = -1;
 };
 
 class ProgressItem : public QObject
