@@ -22,6 +22,8 @@ Extended features:
 This application is based upon the QT 5.12 toolkit or above in its LGPL version.
 Please refer to https://doc.qt.io/qt-5/licensing.html
 
+This project is still in use but works quite well. So actually no need for changes!
+
 --------------------------------------------
 
 ## Version History
