@@ -19,7 +19,7 @@
 
 ****************************************************************************/
 #include "progressmodel.h"
-#include "../backup/Utilities.h"
+#include "../backup/src/Utilities.h"
 #include "ressources/version.inc"
 
 QQmlApplicationEngine *m_qmlEngine;
@@ -58,7 +58,7 @@ ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
     for( const auto &item : qAsConst(properties) )
     {
       if( item.contains("itmid=") )
-        m_id = item.midRef(6).toInt();
+        m_id = item.mid(6).toInt();
       if( item.contains("title=") )
         m_name = item.mid(6);
       if( item.contains("descr=") )
@@ -78,9 +78,9 @@ ProgressEntry::ProgressEntry(int itemId, const QString &fromString)
       if( item.contains("spent=") )
       {
         if( workIndex==m_workInSeconds.size() )
-          m_workInSeconds.push_back(item.midRef(6).toULongLong());
+          m_workInSeconds.push_back(item.mid(6).toULongLong());
         else
-          m_workInSeconds[workIndex] = item.midRef(6).toULongLong();
+          m_workInSeconds[workIndex] = item.mid(6).toULongLong();
         workIndex++;
       }
     }
@@ -629,7 +629,7 @@ void ProgressModel::setShowBreakTimes(const bool &show)
 
 QQmlListProperty<ProgressItem> ProgressModel::itemList()
 {
-  return QQmlListProperty<ProgressItem>(this, m_progressItems);
+  return QQmlListProperty<ProgressItem>(this, &m_progressItems);
 }
 
 bool ProgressModel::showSumInPercent() const
@@ -980,7 +980,7 @@ void ProgressModel::enterCheckin(const QString &checkin)
   qDebug() << checkin;
   QDateTime actual = QDateTime::currentDateTime();
   QTime time = actual.time();
-  time.setHMS(checkin.midRef(0,2).toInt(),checkin.midRef(3,2).toInt(),0);
+  time.setHMS(checkin.mid(0,2).toInt(),checkin.mid(3,2).toInt(),0);
   actual.setTime(time);
 
   m_checkinTime = actual.toSecsSinceEpoch();
@@ -1123,7 +1123,7 @@ void ProgressModel::createDefaultList()
   QTextStream s(&file);
   for( const auto &entry : qAsConst(m_progressItems) )
   {
-    s << "title=" << entry->projectName() << ";descr=" << entry->description() << endl;
+      s << "title=" << entry->projectName() << ";descr=" << entry->description() << Qt::endl;
   }
 }
 
