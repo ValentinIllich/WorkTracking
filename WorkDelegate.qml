@@ -32,11 +32,11 @@ ItemDelegate {
     width: parent.width
     checkable: true
 
-    function sizeFromModel() {
-        return 7
+    function labelsfromModel() {
+        return [ "-30 min", "-15 min", "-5 min", "0", "5 min", "15 min", "30 min" ]
     }
     function formatNumberFromModel(number) {
-        var label = [ "-30", "-15", "-5", "0", "5", "15", "30" ]
+        var label = labelsfromModel()
         return label[number]
     }
     function secondsFromModel(number) {
@@ -140,62 +140,57 @@ ItemDelegate {
             }
         }
 
-        RowLayout {
-            id: editFields
-            ColumnLayout {
-                id: projectproperties
-
-                TextField {
-                    id: nameTextField
-                    placeholderText: qsTr("Enter name here")
-                    cursorVisible: true
-                    visible: root.checked && projectData.isChangeable
-                    text: model.projectName
-                    onTextEdited: model.projectName = text
-                }
-                TextField {
-                    id: descriptionTextField
-                    placeholderText: qsTr("Enter description here")
-                    cursorVisible: true
-                    visible: root.checked && projectData.isChangeable
-                    text: model.description
-                    onTextEdited: model.description = text
-                }
-                Button {
-                    id: deleteButton
-                    text: qsTr("Delete")
-                    width: 40
-                    height: 40
-                    visible: root.checked && projectData.isChangeable
-                    onClicked: projectData.remove(model.index)
-                }
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
-
+        ColumnLayout {
             RowLayout {
-                id: workCorrection
+                id: editFields
+                ColumnLayout {
+                    id: projectproperties
 
-                Button {
-                    text: qsTr("Add")
-                    visible: root.checked && projectData.isChangeable
-                    onClicked: projectData.addSeconds(model.index,secondsFromModel(correctionTumbler.currentIndex))
-                }
-                Tumbler {
-                    id: correctionTumbler
-                    model: sizeFromModel()
-                    delegate: TumblerDelegate {
-                        text: formatNumberFromModel(modelData)
+                    TextField {
+                        id: nameTextField
+                        placeholderText: qsTr("Enter name here")
+                        cursorVisible: true
+                        visible: root.checked && projectData.isChangeable
+                        text: model.projectName
+                        onTextEdited: model.projectName = text
+                        Layout.fillWidth: true
                     }
-                    currentIndex: 3
-                    visible: root.checked && projectData.isChangeable
+                    TextField {
+                        id: descriptionTextField
+                        placeholderText: qsTr("Enter description here")
+                        cursorVisible: true
+                        visible: root.checked && projectData.isChangeable
+                        text: model.description
+                        onTextEdited: model.description = text
+                        Layout.fillWidth: true
+                    }
                 }
-                Label {
-                    text: qsTr("min")
-                    visible: root.checked && projectData.isChangeable
+
+                ColumnLayout {
+                    Button {
+                        text: qsTr("Add")
+                        visible: root.checked && projectData.isChangeable
+                        onClicked: projectData.addSeconds(model.index,secondsFromModel(correctionCombo.currentIndex))
+                    }
+                    RowLayout {
+                        id: workCorrection
+
+                        ComboBox {
+                            id: correctionCombo
+                            model: labelsfromModel()
+                            currentIndex: 3
+                            visible: root.checked && projectData.isChangeable
+                        }
+                    }
                 }
+            }
+            Button {
+                id: deleteButton
+                text: qsTr("Delete")
+                width: 40
+                height: 40
+                visible: root.checked && projectData.isChangeable
+                onClicked: projectData.remove(model.index)
             }
         }
     }
