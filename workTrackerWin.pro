@@ -3,7 +3,7 @@ TARGET = workTracking
 QT += quick widgets
 
 SOURCES += main.cpp \
-    ../backup/utilities.cpp \
+    ../backup/src/utilities.cpp \
     progressmodel.cpp
 
 TRANSLATIONS = \
@@ -13,7 +13,7 @@ TRANSLATIONS = \
 RESOURCES += qml.qrc
 
 HEADERS += \
-    ../backup/Utilities.h \
+    ../backup/src/Utilities.h \
     progressmodel.h
 
 win32 {
