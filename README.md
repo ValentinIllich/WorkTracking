@@ -32,6 +32,18 @@ This project is still in use but works quite well. So actually no need for chang
 
 ## Version History
 
+### Version 2.2.1 (27.9.2025)
+
+#### New features
+- changed tumbler for time correction into combobox. Changing layout.
+
+#### Fixed problems
+- fixing problem with auto stop when popup is closed by system: now repeating message
+
+
+
+--------------------------------------------
+
 ### Version 2.1.7 (15.07.2022)
 
 #### Fixed problems
