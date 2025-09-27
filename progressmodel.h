@@ -182,7 +182,7 @@ public:
   Q_INVOKABLE void next();
   Q_INVOKABLE void jumpToDay(const int &day,const int &month,const int &year);
   Q_INVOKABLE void enterCheckin(const QString &checkin);
-  Q_INVOKABLE void cancelAutoStop();
+  Q_INVOKABLE void cancelAutoStop(int buttonclicked);
 
   Q_INVOKABLE void exportToClipboard(const QString &,const QString &);
   Q_INVOKABLE void changeSummary();
@@ -264,6 +264,7 @@ private:
   int m_lastRecordingItem                 = -1;
   int m_lastRecordingAccount              = -1;
   quint64 m_lastRecordingSeconds          = 0;
+  bool m_needsUserInput                   = false;
   qint64 m_checkinTime                    = -1;
 };
 

@@ -19,15 +19,14 @@
 
 ****************************************************************************/
 
-import QtQuick 2.11
-import QtQuick.Controls 2.4
-import QtQuick.Controls.Material 2.4
-import QtQuick.Layouts 1.11
-import QtQuick.Window 2.11
-import QtQuick.Dialogs 1.1
-import Qt.labs.settings 1.0
-import Qt.labs.calendar 1.0
-import ProjectsData 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Material
+import QtQuick.Layouts
+import QtQuick.Window
+import QtQuick.Dialogs
+import Qt.labs.settings
+import ProjectsData
 
 ApplicationWindow {
     property int windowx: projectData.geometry.x
@@ -509,9 +508,9 @@ ApplicationWindow {
         }
     }
 
-    function recordingstopignore()
+    function recordingstopfeedback(buttonclicked)
     {
-        projectData.cancelAutoStop()
+        projectData.cancelAutoStop(buttonclicked)
         recordingstopped.close()
     }
 
@@ -522,6 +521,7 @@ ApplicationWindow {
         width: parent.width
         //x: Math.round((windowWidth - implicitWidth) / 2)
         y: Math.round((windowHeight - implicitHeight) / 2)
+        onClosed: recordingstopfeedback(0)
 
         ColumnLayout {
             width: windowWidth
@@ -533,11 +533,11 @@ ApplicationWindow {
             {
                 Button {
                     text: qsTr("Reject")
-                    onClicked: recordingstopignore()
+                    onClicked: recordingstopfeedback(1)
                 }
                 Button {
                     text: qsTr("Accept")
-                    onClicked: recordingstopped.close()
+                    onClicked: recordingstopfeedback(2)
                 }
             }
 

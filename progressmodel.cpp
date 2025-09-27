@@ -734,6 +734,9 @@ void ProgressModel::workingTimer()
   qint64 delta = elapsed-m_lastElapsed;
   m_lastElapsed = elapsed;
 
+  if( m_needsUserInput )
+    emit recordingStopped();
+
   bool isCurrnetIdle = true;
   for( int i=0; i<m_progressEntries.size(); i++ )
   {
@@ -843,6 +846,7 @@ void ProgressModel::workingTimer()
               m_idleSinceSeconds = m_inactivityLimit;
 
               m_currentRecordingAccount = -1;
+              m_needsUserInput = true;
 
               emit totalTimeChanged();
               emit recordingStopped();
@@ -1007,26 +1011,42 @@ void ProgressModel::enterCheckin(const QString &checkin)
   }
 }
 
-void ProgressModel::cancelAutoStop()
+void ProgressModel::cancelAutoStop(int buttonclicked)
 {
-  m_idleSinceSeconds = 0;
-  m_currentRecordingAccount = m_lastRecordingAccount;
-
-  for( int i=0; i<m_progressEntries.size(); i++ )
+  // 1=REJECT 2=ACCEPT 0=CLOSE
+  switch( buttonclicked )
   {
-    if( m_progressEntries[i].getId()==m_lastRecordingItem )
-    {
-      m_progressEntries[i].setItemActive(true);
-      m_progressEntries[i].addWorkInSeconds(m_lastRecordingAccount,m_runningSeconds-m_lastRecordingSeconds);
-      for( int j=0; j<m_progressItems.size(); j++ )
+    case 0: // popup closed
+      // if( m_needsUserInput )
+      //   emit recordingStopped();
+      break;
+    case 1: // Reject was clicked
       {
-        if( m_progressItems.at(j)->getId()==m_lastRecordingItem )
+        m_idleSinceSeconds = 0;
+        m_currentRecordingAccount = m_lastRecordingAccount;
+
+        for( int i=0; i<m_progressEntries.size(); i++ )
         {
-          m_progressItems.at(j)->setIsActive(true);
-          m_progressItems.at(j)->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
+            if( m_progressEntries[i].getId()==m_lastRecordingItem )
+            {
+                m_progressEntries[i].setItemActive(true);
+                m_progressEntries[i].addWorkInSeconds(m_lastRecordingAccount,m_runningSeconds-m_lastRecordingSeconds);
+                for( int j=0; j<m_progressItems.size(); j++ )
+                {
+                    if( m_progressItems.at(j)->getId()==m_lastRecordingItem )
+                    {
+                        m_progressItems.at(j)->setIsActive(true);
+                        m_progressItems.at(j)->setSummary(getSummaryText(m_progressEntries[i],m_totalWorkSeconds));
+                    }
+                }
+            }
         }
       }
-    }
+      m_needsUserInput = false;
+      break;
+    case 2: // Accept was clicked
+      m_needsUserInput = false;
+      break;
   }
 }
 
